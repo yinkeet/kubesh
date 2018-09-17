@@ -1,9 +1,7 @@
 #!/bin/bash
 
 set -a
-# test=$(cat $PWD/nginx/tag)
-# echo $test
-# exit
+
 HOME_DIR="$(dirname "$0")"
 
 source "$HOME_DIR/.env"
@@ -25,17 +23,6 @@ for i in "${ALL_ENVIRONMENTS[@]}"
 do
 	eval $i
 done
-
-# if [ ! -f "$PWD/$CONTAINERS_SH" ]; then
-#     echo "'$PWD/$CONTAINERS_SH' not found!"
-#     exit
-# fi
-# source "$PWD/$CONTAINERS_SH"
-# # Evaluate containers
-# for i in "${CONTAINERS[@]}"
-# do
-# 	eval $i
-# done
 
 # Prepare command to find all container directories
 for i in "${MINIKUBE_ENVIRONMENTS[@]}" "${KUBE_ENVIRONMENTS[@]}"
@@ -59,6 +46,7 @@ source "$HOME_DIR/scripts/stop.sh"
 source "$HOME_DIR/scripts/ssh.sh"
 source "$HOME_DIR/scripts/log.sh"
 source "$HOME_DIR/scripts/ls.sh"
+source "$HOME_DIR/scripts/url.sh"
 source "$HOME_DIR/scripts/docker.sh"
 source "$HOME_DIR/scripts/gcloud.sh"
 source "$HOME_DIR/scripts/kubernetes.sh"
