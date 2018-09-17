@@ -5,13 +5,12 @@ build_kube_help() {
 
 	local container
 	local containers
-    for i in "${CONTAINERS[@]}"
+    for container in "${CONTAINERS[@]}"
 	do
-		IFS='=' read -ra container <<< "$i"
 		if [[ ! $containers ]]; then
-			containers="${container[1]}"
+			containers=$container
 		else
-			containers="$containers\n  ${container[1]}"
+			containers="$containers\n  $container"
 		fi
 	done
 
@@ -44,40 +43,14 @@ build_kube_arguments_parser() {
 	esac
 	done
 
-	contains $1 ${CONTAINERS[@]}
-	if [ $? -eq 1 ]; then
-		return 2
-	else
-		return 0
-	fi
-
-
-	# if [[ $1 = "-h" ]] || [[ $1 = "--help" ]]; then
-	# 	return 0
-	# fi
-
-	# if [ "$#" -eq 0 ]; then
-	# 	return 1
-	# elif [ "$#" -eq 1 ]; then
-	# 	local container
-	# 	local found_container
-	# 	if [ $? -eq 1 ]; then
-
-	# 	fi
-	# 	for i in "${CONTAINERS[@]}"
-	# 	do
-	# 		IFS='=' read -ra container <<< "$i"
-	# 		if [[ $1 = "${container[1]}" ]]; then
-	# 			found_container=$1
-	# 		fi
-	# 	done
-
-	# 	if [[ ! $found_container ]]; then
-	# 		return 0
-	# 	fi
-
-	# 	return 2
-	# fi
+	local container
+	for container in "${CONTAINERS[@]}"
+	do
+		if [[ $1 = $container ]]; then
+			return 2
+		fi
+	done
+	return 0
 }
 
 build_dev() {
@@ -117,8 +90,8 @@ build_minikube() {
     local environment=$1
 	local container
     shift
-    args=$(build_kube_arguments_parser $@)
-	result=$?
+    build_kube_arguments_parser $@
+	local result=$?
 	if [ $result -eq 0 ]; then
 	 	build_kube_help $MINIKUBE
 	elif [ $result -eq 1 ]; then
