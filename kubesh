@@ -1,0 +1,67 @@
+#!/bin/bash
+
+set -a
+# test=$(cat $PWD/nginx/tag)
+# echo $test
+# exit
+HOME_DIR="$(dirname "$0")"
+
+source "$HOME_DIR/.env"
+if [ -f "$PWD/kubesh.env" ]; then
+    source "$PWD/kubesh.env"
+fi
+
+# Load .env from the calling directory
+if [ ! -f "$PWD/$DOT_ENV" ]; then
+    echo "'$PWD/$DOT_ENV' not found!"
+    exit
+fi
+source "$PWD/$DOT_ENV"
+
+# Merge docker, minikube abd kube environments into one
+ALL_ENVIRONMENTS=( "${DOCKER_ENVIRONMENTS[@]}" "${MINIKUBE_ENVIRONMENTS[@]}" "${KUBE_ENVIRONMENTS[@]}" )
+# Evaluate all environments
+for i in "${ALL_ENVIRONMENTS[@]}"
+do
+	eval $i
+done
+
+# if [ ! -f "$PWD/$CONTAINERS_SH" ]; then
+#     echo "'$PWD/$CONTAINERS_SH' not found!"
+#     exit
+# fi
+# source "$PWD/$CONTAINERS_SH"
+# # Evaluate containers
+# for i in "${CONTAINERS[@]}"
+# do
+# 	eval $i
+# done
+
+# Prepare command to find all container directories
+for i in "${MINIKUBE_ENVIRONMENTS[@]}" "${KUBE_ENVIRONMENTS[@]}"
+do
+    IFS='=' read -ra strings <<< "$i"
+    filename="${strings[0]}_DOCKERFILE"
+	filename=${!filename}
+    if [[ ! $names ]]; then
+        names=" -name '$filename'"
+    else
+        names="$names -o -name '$filename' "
+    fi
+done
+CONTAINERS=($(eval "find . -type f $names | sed -E 's|/[^/]+$||' | sort -u | sed -e 's/^.\///'"))
+
+source "$HOME_DIR/scripts/variables.env"
+source "$HOME_DIR/scripts/common.sh"
+source "$HOME_DIR/scripts/build.sh"
+source "$HOME_DIR/scripts/run.sh"
+source "$HOME_DIR/scripts/stop.sh"
+source "$HOME_DIR/scripts/ssh.sh"
+source "$HOME_DIR/scripts/log.sh"
+source "$HOME_DIR/scripts/ls.sh"
+source "$HOME_DIR/scripts/docker.sh"
+source "$HOME_DIR/scripts/gcloud.sh"
+source "$HOME_DIR/scripts/kubernetes.sh"
+source "$HOME_DIR/scripts/main.sh"
+
+usage
