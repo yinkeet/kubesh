@@ -48,13 +48,3 @@ generate_image_name() {
 		echo $KUBE_IMAGE_NAME_FORMAT | envsubst
 	fi
 }
-
-# get_config "prod" "_ENV" ${KUBE_ENVIRONMENTS[@]}
-# get_config "dev" "_DOCKER_COMPOSE_YML" ${DOCKER_ENVIRONMENTS[@]}
-# get_config "stage" "_DOCKERFILE" ${ALL_ENVIRONMENTS[@]}
-# get_config "minikube" "_DEPLOYMENT_YAML" ${ALL_ENVIRONMENTS[@]}
-# get_config "nginx" "_TAG" ${CONTAINERS[@]}
-# image_name=$(generate_image_name "minikube" "nginx")
-# echo $image_name
-# generate_image_name "stage" "nginx"
-# exit
