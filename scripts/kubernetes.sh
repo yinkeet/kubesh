@@ -74,34 +74,17 @@ image_pull_secret() {
         echo "'$image_pull_secret_key' not found!"
         exit
     fi
-    
-    # # Load image_pull_secret.yaml
-    # local image_pull_secret_yaml="$PWD/image_pull_secret.yaml"
-    # if [ ! -f $image_pull_secret_yaml ]; then
-    #     image_pull_secret_yaml="$HOME_DIR/image_pull_secret.yaml"
-    # fi
 
-    # # Load service_account.yaml
-    # local service_account_yaml="$PWD/service_account.yaml"
-    # if [ ! -f $service_account_yaml ]; then
-    #     service_account_yaml="$HOME_DIR/service_account.yaml"
-    # fi
-
-    # # local BASE64_ENCODED_IMAGE_PULL_SECRET_JSON=$(base64 $image_pull_secret_key)
-	# local BASE64_ENCODED_IMAGE_PULL_SECRET_JSON=$1
-	# envsubst < $image_pull_secret_yaml | kubectl replace -f -
-	# cat $service_account_yaml | kubectl replace -f -
-	secretName="gcr-json-key"
-    metadataName=$(kubectl get secret $secretName -o json | jq '.metadata.name')
-    metadataName="${metadataName%\"}"
-	metadataName="${metadataName#\"}"
-    if [ "$metadataName" == "$secretName" ]; then
-        kubectl delete secret $secretName
+	# Load service_account.yaml
+    local service_account_yaml="$PWD/service_account.yaml"
+    if [ ! -f $service_account_yaml ]; then
+        service_account_yaml="$HOME_DIR/service_account.yaml"
     fi
-    password="$(cat $image_pull_secret_key)"
-    kubectl create secret docker-registry gcr-json-key --docker-server=https://gcr.io --docker-username=_json_key --docker-password="$password" --docker-email=tech@imoney-group.com
-    kubectl delete serviceaccount default 
-    kubectl patch serviceaccount default -p "{\"imagePullSecrets\":[{\"name\":\"$secretName\"}]}"
+    
+    local password="$(cat $image_pull_secret_key)"
+	local email=$(cat image_pull_secret_key.json | jq '.client_email')
+    kubectl create secret docker-registry gcr-json-key --docker-server=$GCR_IO --docker-username=_json_key --docker-password="$password" --docker-email=$email --dry-run -o yaml | kubectl replace -f -
+    cat $service_account_yaml | kubectl replace -f -
 }
 
 if [[ $1 = $KUBERNETES ]]; then
