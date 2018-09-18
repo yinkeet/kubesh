@@ -17,7 +17,8 @@ fi
 source "$PWD/$DOT_ENV"
 
 # Merge docker, minikube abd kube environments into one
-ALL_ENVIRONMENTS=( "${DOCKER_ENVIRONMENTS[@]}" "${MINIKUBE_ENVIRONMENTS[@]}" "${KUBE_ENVIRONMENTS[@]}" )
+MINIKUBE_AND_KUBE_ENVIRONMENTS=( "${MINIKUBE_ENVIRONMENTS[@]}" "${KUBE_ENVIRONMENTS[@]}" )
+ALL_ENVIRONMENTS=( "${DOCKER_ENVIRONMENTS[@]}" "${MINIKUBE_AND_KUBE_ENVIRONMENTS[@]}" )
 # Evaluate all environments
 for i in "${ALL_ENVIRONMENTS[@]}"
 do
