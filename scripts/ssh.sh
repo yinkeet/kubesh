@@ -3,8 +3,8 @@
 ssh_dev_help() {
 	local environment=$1
     echo ""
-	echo "Usage: ./docker-utilities $environment ssh CONTAINER_NAME COMMAND"
-	echo "       ./docker-utilities $environment ssh [ -h | --help ]"
+	echo "Usage: ./kubesh $environment ssh CONTAINER_NAME COMMAND"
+	echo "       ./kubesh $environment ssh [ -h | --help ]"
     echo ""
 	echo "Container name:"
 	echo "  Name of container defined in docker-compose.yml"
@@ -44,8 +44,8 @@ ssh_kube_help() {
 	done
     
     echo ""
-	echo "Usage: ./docker-utilities $environment ssh POD_NAME CONTAINER_NAME COMMAND"
-	echo "       ./docker-utilities $environment ssh [ -h | --help ]"
+	echo "Usage: ./kubesh $environment ssh POD_NAME CONTAINER_NAME COMMAND"
+	echo "       ./kubesh $environment ssh [ -h | --help ]"
     echo ""
     echo "Pod name:"
 	echo -e "  $pods"

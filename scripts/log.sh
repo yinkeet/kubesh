@@ -3,8 +3,8 @@
 log_dev_help() {
 	local environment=$1
 	echo ""
-	echo "Usage: ./docker-utilities $environment log CONTAINER_NAME [OPTION]"
-	echo "       ./docker-utilities $environment log [ -h | --help ]"
+	echo "Usage: ./kubesh $environment log CONTAINER_NAME [OPTION]"
+	echo "       ./kubesh $environment log [ -h | --help ]"
     echo ""
 	echo "Container name:"
 	echo "  Name of container defined in docker-compose.yml"
@@ -31,19 +31,19 @@ log_kube_help() {
 		fi
 	done
 
-    for i in "${CONTAINERS[@]}"
+	local container
+    for container in "${CONTAINERS[@]}"
 	do
-		IFS='=' read -ra container <<< "$i"
 		if [[ ! $containers ]]; then
-			containers="${container[1]}"
+			containers="$container"
 		else
-			containers="$containers\n  ${container[1]}"
+			containers="$containers\n  $container"
 		fi
 	done
     
     echo ""
-	echo "Usage: ./docker-utilities $environment log POD_NAME CONTAINER_NAME [OPTION]"
-	echo "       ./docker-utilities $environment log [ -h | --help ]"
+	echo "Usage: ./kubesh $environment log POD_NAME CONTAINER_NAME [OPTION]"
+	echo "       ./kubesh $environment log [ -h | --help ]"
     echo ""
     echo "Pod name:"
 	echo -e "  $pods"

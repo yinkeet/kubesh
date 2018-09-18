@@ -3,8 +3,8 @@
 run_help() {
     environment=$1
 	echo ""
-	echo "Usage: ./docker-utilities $environment run [OPTIONS]"
-	echo "       ./docker-utilities $environment run [ -h | --help ]"
+	echo "Usage: ./kubesh $environment run [OPTIONS]"
+	echo "       ./kubesh $environment run [ -h | --help ]"
     echo ""
 	echo "Options:"
     echo "  -h, --help    Prints usage."

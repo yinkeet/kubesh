@@ -18,9 +18,9 @@ usage() {
 	done
 
 	echo ""
-	echo "Usage: ./docker-utilities ENVIRONMENT [arg...]"
-	echo "       ./docker-utilities HELPERS [arg...]"
-    echo "       ./docker-utilities [ -h | --help ]"
+	echo "Usage: ./kubesh ENVIRONMENT [arg...]"
+	echo "       ./kubesh HELPERS [arg...]"
+    echo "       ./kubesh [ -h | --help ]"
 	echo ""
 	echo "Options:"
 	echo "  -h, --help    Prints usage."
@@ -44,8 +44,8 @@ environment_help() {
     local environment=$1
 	local minikube_and_kube_environments=( "${MINIKUBE_ENVIRONMENTS[@]}" "${KUBE_ENVIRONMENTS[@]}" )
     echo ""
-	echo "Usage: ./docker-utilities $environment COMMANDS"
-    echo "       ./docker-utilities [ -h | --help ]"
+	echo "Usage: ./kubesh $environment COMMANDS"
+    echo "       ./kubesh [ -h | --help ]"
 	echo ""
 	echo "Options:"
 	echo "  -h, --help    Prints usage."

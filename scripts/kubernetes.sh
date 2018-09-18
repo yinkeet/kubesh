@@ -2,8 +2,8 @@
 
 kubernetes_help() {
 	echo ""
-	echo "Usage: ./docker-utilities $KUBERNETES COMMANDS"
-    echo "       ./docker-utilities [ -h | --help ]"
+	echo "Usage: ./kubesh $KUBERNETES COMMANDS"
+    echo "       ./kubesh [ -h | --help ]"
 	echo ""
 	echo "Options:"
 	echo "  -h, --help    Prints usage."
@@ -16,8 +16,8 @@ kubernetes_help() {
 
 kubernetes_image_pull_secret_help() {
 	echo ""
-	echo "Usage: ./docker-utilities $KUBERNETES $IMAGE_PULL_SECRET FILENAME"
-    echo "       ./docker-utilities [ -h | --help ]"
+	echo "Usage: ./kubesh $KUBERNETES $IMAGE_PULL_SECRET FILENAME"
+    echo "       ./kubesh [ -h | --help ]"
 	echo ""
 	echo "Options:"
 	echo "  -h, --help    Prints usage."
@@ -89,8 +89,9 @@ image_pull_secret() {
     fi
 
     BASE64_ENCODED_IMAGE_PULL_SECRET_JSON=$(cat $image_pull_secret_key | base64)
-    cat $image_pull_secret_yaml | envsubst | kubectl replace -f -
-    cat $service_account_yaml | envsubst | kubectl replace -f -
+	cat $image_pull_secret_yaml | envsubst
+    # cat $image_pull_secret_yaml | envsubst | kubectl replace -f -
+    # cat $service_account_yaml | envsubst | kubectl replace -f -
 }
 
 if [[ $1 = $KUBERNETES ]]; then

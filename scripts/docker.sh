@@ -2,8 +2,8 @@
 
 docker_help() {
 	echo ""
-	echo "Usage: ./docker-utilities $DOCKER COMMANDS"
-    echo "       ./docker-utilities [ -h | --help ]"
+	echo "Usage: ./kubesh $DOCKER COMMANDS"
+    echo "       ./kubesh [ -h | --help ]"
 	echo ""
 	echo "Options:"
 	echo "  -h, --help    Prints usage."

@@ -2,8 +2,8 @@
 
 gcloud_help() {
 	echo ""
-	echo "Usage: ./docker-utilities $GCLOUD COMMANDS"
-    echo "       ./docker-utilities [ -h | --help ]"
+	echo "Usage: ./kubesh $GCLOUD COMMANDS"
+    echo "       ./kubesh [ -h | --help ]"
 	echo ""
 	echo "Options:"
 	echo "  -h, --help    Prints usage."
@@ -16,8 +16,8 @@ gcloud_help() {
 
 gcloud_auth_help() {
 	echo ""
-	echo "Usage: ./docker-utilities $GCLOUD $AUTH FILENAME"
-    echo "       ./docker-utilities [ -h | --help ]"
+	echo "Usage: ./kubesh $GCLOUD $AUTH FILENAME"
+    echo "       ./kubesh [ -h | --help ]"
 	echo ""
 	echo "Options:"
 	echo "  -h, --help    Prints usage."

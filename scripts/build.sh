@@ -15,8 +15,8 @@ build_kube_help() {
 	done
 
     echo ""
-	echo "Usage: ./docker-utilities $environment build [CONTAINER_NAME]"
-	echo "       ./docker-utilities $environment build [ -h | --help ]"
+	echo "Usage: ./kubesh $environment build [CONTAINER_NAME]"
+	echo "       ./kubesh $environment build [ -h | --help ]"
 	echo ""
 	echo "If no CONTAINER_NAME is given then all containers will be built."
     echo ""
@@ -135,9 +135,10 @@ build_kube() {
     local environment=$1
     shift
 	build_kube_arguments_parser $@
-	if [ $? -eq 0 ]; then
+	local result=$?
+	if [ $result -eq 0 ]; then
 	 	build_kube_help $environment
-	elif [ $? -eq 1 ]; then
+	elif [ $result -eq 1 ]; then
 		echo "Building all images for $APP..."
 		local container
 
@@ -159,7 +160,7 @@ build_kube() {
 			exit
 		fi
 	else
-		echo "Build and push $1 image for $APP..."
+		echo "Building $1 image for $APP..."
 		contains $environment ${MINIKUBE_ENVIRONMENTS[@]}
 		if [ $? -eq 1 ]; then
 			build_minikube_image $environment $1
