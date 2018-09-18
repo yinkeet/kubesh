@@ -87,7 +87,8 @@ run_kube() {
         for container in "${CONTAINERS[@]}"
 		do
             local image_name=$(generate_image_name $environment $container)
-            eval "${container}_image_name=$image_name"
+            local tag=$(cat $PWD/$container/tag)
+            eval "${container}_image_name=$image_name:$tag"
 		done
         
         if [ $result -eq 1 ]; then
