@@ -110,31 +110,6 @@ dev_commands_exec() {
 	exit
 }
 
-minikube_commands_exec() {
-	local environment=$1
-	shift
-	if [[ $1 = $BUILD ]]; then
-		shift
-		build_minikube $environment $@
-	elif [[ $1 = $RUN ]]; then
-		shift
-		run_kube $environment $@
-	elif [[ $1 = $STOP ]]; then
-		stop_kube $environment
-	elif [[ $1 = $SSH ]]; then
-		shift
-		ssh_kube $environment $@
-	elif [[ $1 = $LOG ]]; then
-		shift
-		log_kube $environment $@
-	elif [[ $1 = $LS ]]; then
-		ls_kube
-	elif [[ $1 = $URL ]]; then
-		url_minikube
-	fi
-	exit
-}
-
 kube_commands_exec() {
 	local environment=$1
 	shift
@@ -179,17 +154,13 @@ if [ $? -eq 1 ]; then
 			exit
 		fi
 		source $env_file
-		# Command exec
-		# Docker environment
+		
 		contains $environment ${DOCKER_ENVIRONMENTS[@]}
 		if [ $? -eq 1 ]; then
 			dev_commands_exec $environment $@
 		fi
-		contains $environment ${MINIKUBE_ENVIRONMENTS[@]}
-		if [ $? -eq 1 ]; then
-			minikube_commands_exec $environment $@
-		fi
-		contains $environment ${KUBE_ENVIRONMENTS[@]}
+
+		contains $environment ${MINIKUBE_AND_KUBE_ENVIRONMENTS[@]}
 		if [ $? -eq 1 ]; then
 			kube_commands_exec $environment $@
 		fi
