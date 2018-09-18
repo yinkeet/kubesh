@@ -63,34 +63,34 @@ kubernetes_image_pull_secret_arguments_parser() {
 }
 
 image_pull_secret() {
-    shift
 	kubernetes_image_pull_secret_arguments_parser $@
     if [ $? -eq 0 ]; then
 	 	kubernetes_image_pull_secret_help
     fi
     
-    filename=$1
-    image_pull_secret_key="$PWD/$filename"
-    if [ ! -f $image_pull_secret_key ]; then
-        echo "'$image_pull_secret_key' not found!"
-        exit
-    fi
+    # local filename=$1
+    # image_pull_secret_key="$PWD/$filename"
+    # if [ ! -f $image_pull_secret_key ]; then
+    #     echo "'$image_pull_secret_key' not found!"
+    #     exit
+    # fi
     
     # Load image_pull_secret.yaml
-    image_pull_secret_yaml="$PWD/image_pull_secret.yaml"
+    local image_pull_secret_yaml="$PWD/image_pull_secret.yaml"
     if [ ! -f $image_pull_secret_yaml ]; then
         image_pull_secret_yaml="$HOME_DIR/image_pull_secret.yaml"
     fi
 
     # Load service_account.yaml
-    service_account_yaml="$PWD/service_account.yaml"
+    local service_account_yaml="$PWD/service_account.yaml"
     if [ ! -f $service_account_yaml ]; then
         service_account_yaml="$HOME_DIR/service_account.yaml"
     fi
 
-    BASE64_ENCODED_IMAGE_PULL_SECRET_JSON=$(base64 $image_pull_secret_key)
+    # local BASE64_ENCODED_IMAGE_PULL_SECRET_JSON=$(base64 $image_pull_secret_key)
+	local BASE64_ENCODED_IMAGE_PULL_SECRET_JSON=$1
 	envsubst < $image_pull_secret_yaml | kubectl replace -f -
-	envsubst < $service_account_yaml | kubectl replace -f -
+	cat $service_account_yaml | kubectl replace -f -
 }
 
 if [[ $1 = $KUBERNETES ]]; then
@@ -100,6 +100,7 @@ if [[ $1 = $KUBERNETES ]]; then
 	 	kubernetes_help
 	else
 		if [[ $1 = $IMAGE_PULL_SECRET ]]; then
+			shift
 			image_pull_secret $@
 			exit
 		fi
