@@ -36,7 +36,6 @@ get_config() {
 generate_image_name() {
 	local environment=$1
 	local container=$2
-	local tag=$(cat $PWD/$container/tag)
 	
 	contains $environment ${MINIKUBE_ENVIRONMENTS[@]}
 	if [ $? -eq 1 ]; then
