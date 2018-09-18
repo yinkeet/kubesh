@@ -89,8 +89,8 @@ image_pull_secret() {
     fi
 
     BASE64_ENCODED_IMAGE_PULL_SECRET_JSON=$(cat $image_pull_secret_key | base64)
-    cat $image_pull_secret_yaml | envsubst | grep '\S' | kubectl replace -f -
-    cat $service_account_yaml | envsubst | grep '\S' | kubectl replace -f -
+    cat $image_pull_secret_yaml | envsubst | awk 'NR>1{print PREV} {PREV=$0} END{printf("%s",$0)}' | kubectl replace -f -
+    cat $service_account_yaml | envsubst | awk 'NR>1{print PREV} {PREV=$0} END{printf("%s",$0)}' | kubectl replace -f -
 }
 
 if [[ $1 = $KUBERNETES ]]; then
