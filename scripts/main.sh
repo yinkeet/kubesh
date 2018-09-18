@@ -1,12 +1,15 @@
 #!/bin/bash
 
 usage() {
-	for i in "${ALL_ENVIRONMENTS[@]}"
+	local string
+	local array
+	local environments
+	for string in "${ALL_ENVIRONMENTS[@]}"
 	do
-		IFS='=' read -ra environment <<< "$i"
-		description="${environment[0]}_DESCRIPTION"
+		IFS='=' read -ra array <<< "$string"
+		local description="${array[0]}_DESCRIPTION"
 		description=${!description}
-		string=$(printf '%-13s%s' "${environment[1]}" "$description")
+		string=$(printf '%-13s%s' "${array[1]}" "$description")
 		if [[ ! $environments ]]; then
 			environments=$string
 		else
@@ -39,6 +42,7 @@ usage() {
 
 environment_help() {
     local environment=$1
+	local minikube_and_kube_environments=( "${MINIKUBE_ENVIRONMENTS[@]}" "${KUBE_ENVIRONMENTS[@]}" )
     echo ""
 	echo "Usage: ./docker-utilities $environment COMMANDS"
     echo "       ./docker-utilities [ -h | --help ]"
@@ -57,6 +61,10 @@ environment_help() {
     echo "  $SSH          Tunnel into container of the deployment."
     echo "  $LOG          Show logs of container in deployment."
 	echo "  $LS           List all containers in deployment."
+	contains $environment ${minikube_and_kube_environments[@]}
+	if [ $? -eq 1 ]; then
+		echo "  $URL          Shows service url and port."
+	fi
 	echo ""
 	exit
 }
@@ -73,7 +81,7 @@ environment_arguments_parser() {
 	fi
 
 	# Commands
-	if [[ $1 = $SET_CLUSTER ]] || [[ $1 = $BUILD ]] || [[ $1 = $RUN ]] || [[ $1 = $STOP ]] || [[ $1 = $SSH ]] || [[ $1 = $LOG ]] || [[ $1 = $LS ]]; then
+	if [[ $1 = $SET_CLUSTER ]] || [[ $1 = $BUILD ]] || [[ $1 = $RUN ]] || [[ $1 = $STOP ]] || [[ $1 = $SSH ]] || [[ $1 = $LOG ]] || [[ $1 = $LS ]] || [[ $1 = $URL ]]; then
 		return 1
 	fi
 }
@@ -121,6 +129,8 @@ minikube_commands_exec() {
 		log_kube $environment $@
 	elif [[ $1 = $LS ]]; then
 		ls_kube
+	elif [[ $1 = $URL ]]; then
+		url_minikube
 	fi
 	exit
 }
@@ -147,6 +157,8 @@ kube_commands_exec() {
 		log_kube $environment $@
 	elif [[ $1 = $LS ]]; then
 		ls_kube
+	elif [[ $1 = $URL ]]; then
+		url_kube
 	fi
 	exit
 }
