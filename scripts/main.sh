@@ -86,6 +86,17 @@ environment_arguments_parser() {
 	fi
 }
 
+load_containers() {
+	local environment=$1
+	local filename
+	filename=$(get_config $environment "_DOCKERFILE" ${ALL_ENVIRONMENTS[@]})
+	if [ $? -eq 0 ]; then
+		echo "Filename for $environment dockerfile not specified!"
+		exit
+	fi
+	CONTAINERS=($(eval "find . -type f -name '$filename' | sed -E 's|/[^/]+$||' | sort -u | sed -e 's/^.\///'"))
+}
+
 dev_commands_exec() {
 	local environment=$1
 	shift
@@ -146,6 +157,8 @@ if [ $? -eq 1 ]; then
 	if [ $? -eq 0 ]; then
 	 	environment_help $environment
 	else
+		load_containers $environment
+		
 		# Load environment file
 		env_file=$(get_config $environment "_ENV" ${ALL_ENVIRONMENTS[@]})
 		env_file="$PWD/$env_file"

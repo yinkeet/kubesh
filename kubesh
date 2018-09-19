@@ -25,20 +25,6 @@ do
 	eval $i
 done
 
-# Prepare command to find all container directories
-for i in "${MINIKUBE_ENVIRONMENTS[@]}" "${KUBE_ENVIRONMENTS[@]}"
-do
-    IFS='=' read -ra strings <<< "$i"
-    filename="${strings[0]}_DOCKERFILE"
-	filename=${!filename}
-    if [[ ! $names ]]; then
-        names=" -name '$filename'"
-    else
-        names="$names -o -name '$filename' "
-    fi
-done
-CONTAINERS=($(eval "find . -type f $names | sed -E 's|/[^/]+$||' | sort -u | sed -e 's/^.\///'"))
-
 source "$HOME_DIR/scripts/variables.env"
 source "$HOME_DIR/scripts/common.sh"
 source "$HOME_DIR/scripts/build.sh"

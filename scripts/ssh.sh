@@ -2,12 +2,23 @@
 
 ssh_dev_help() {
 	local environment=$1
+
+	local container
+    for container in "${CONTAINERS[@]}"
+	do
+		if [[ ! $containers ]]; then
+			containers="$container"
+		else
+			containers="$containers\n  $container"
+		fi
+	done
+
     echo ""
 	echo "Usage: ./kubesh $environment ssh CONTAINER_NAME COMMAND"
 	echo "       ./kubesh $environment ssh [ -h | --help ]"
     echo ""
 	echo "Container name:"
-	echo "  Name of container defined in docker-compose.yml"
+	echo -e "  $containers"
 	echo ""
 	echo "Command:"
 	echo "  bash, sh and etc..."
