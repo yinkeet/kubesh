@@ -2,9 +2,9 @@
 
 set -a
 
-HOME_DIR="$(dirname "$0")"
+HOME_PATH="$(dirname "$0")"
 
-source "$HOME_DIR/.env"
+source "$HOME_PATH/.env"
 if [ -f "$PWD/kubesh.env" ]; then
     source "$PWD/kubesh.env"
 fi
@@ -25,18 +25,18 @@ do
 	eval $i
 done
 
-source "$HOME_DIR/scripts/variables.env"
-source "$HOME_DIR/scripts/common.sh"
-source "$HOME_DIR/scripts/build.sh"
-source "$HOME_DIR/scripts/run.sh"
-source "$HOME_DIR/scripts/stop.sh"
-source "$HOME_DIR/scripts/ssh.sh"
-source "$HOME_DIR/scripts/log.sh"
-source "$HOME_DIR/scripts/ls.sh"
-source "$HOME_DIR/scripts/url.sh"
-source "$HOME_DIR/scripts/docker.sh"
-source "$HOME_DIR/scripts/gcloud.sh"
-source "$HOME_DIR/scripts/kubernetes.sh"
-source "$HOME_DIR/scripts/main.sh"
+source "$HOME_PATH/scripts/variables.env"
+source "$HOME_PATH/scripts/common.sh"
+source "$HOME_PATH/scripts/build.sh"
+source "$HOME_PATH/scripts/run.sh"
+source "$HOME_PATH/scripts/stop.sh"
+source "$HOME_PATH/scripts/ssh.sh"
+source "$HOME_PATH/scripts/log.sh"
+source "$HOME_PATH/scripts/ls.sh"
+source "$HOME_PATH/scripts/url.sh"
+source "$HOME_PATH/scripts/docker.sh"
+source "$HOME_PATH/scripts/gcloud.sh"
+source "$HOME_PATH/scripts/kubernetes.sh"
+source "$HOME_PATH/scripts/main.sh"
 
 usage
