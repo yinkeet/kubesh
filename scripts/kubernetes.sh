@@ -78,7 +78,7 @@ image_pull_secret() {
 	# Load service_account.yaml
     local service_account_yaml="$PWD/service_account.yaml"
     if [ ! -f $service_account_yaml ]; then
-        service_account_yaml="$HOME_DIR/service_account.yaml"
+        service_account_yaml="$HOME_PATH/scripts/service_account.yaml"
     fi
     
     local password="$(cat $image_pull_secret_key)"
