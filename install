@@ -1,0 +1,11 @@
+#!/bin/bash
+
+HOME_PATH="$( cd "$(dirname "$0")" ; pwd -P )"
+KUBESH_PATH="$HOME_PATH/kubesh"
+BASH_COMPLETION_PATH="$HOME_PATH/scripts/completion.bash"
+
+printf '\n\n# Kubesh PATH\n' >> ~/.bash_profile
+printf 'if [ -f %s ]; then export PATH=%s:$PATH; fi' "'$KUBESH_PATH'" "$HOME_PATH" >> ~/.bash_profile
+
+printf '\n\n# Kubesh bash completion\n' >> ~/.bash_profile
+printf 'if [ -f %s ]; then source %s; fi' "'$BASH_COMPLETION_PATH'" "'$BASH_COMPLETION_PATH'" >> ~/.bash_profile
