@@ -47,3 +47,14 @@ generate_image_name() {
 		echo $KUBE_IMAGE_NAME_FORMAT | envsubst
 	fi
 }
+
+load_containers() {
+	local environment=$1
+	local filename
+	filename=$(get_config $environment "_DOCKERFILE" ${ALL_ENVIRONMENTS[@]})
+	if [ $? -eq 0 ]; then
+		echo "Filename for $environment dockerfile not specified!"
+		exit
+	fi
+	CONTAINERS=($(eval "find . -type f -name '$filename' | sed -E 's|/[^/]+$||' | sort -u | sed -e 's/^.\///'"))
+}
