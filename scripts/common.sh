@@ -54,7 +54,18 @@ load_containers() {
 	filename=$(get_config $environment "_DOCKERFILE" ${ALL_ENVIRONMENTS[@]})
 	if [ $? -eq 0 ]; then
 		echo "Filename for $environment dockerfile not specified!"
-		exit
+		exit 1
 	fi
 	CONTAINERS=($(eval "find . -type f -name '$filename' | sed -E 's|/[^/]+$||' | sort -u | sed -e 's/^.\///'"))
+}
+
+load_environment_file() {
+	local environment=$1
+	local env_file=$(get_config $environment "_ENV" ${ALL_ENVIRONMENTS[@]})
+	env_file="$PWD/$env_file"
+	if [ ! -f $env_file ]; then
+		echo "'$env_file' not found!"
+		exit 1
+	fi
+	source $env_file
 }

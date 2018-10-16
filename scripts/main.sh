@@ -30,7 +30,8 @@ usage() {
 	echo ""
     echo "Helpers:"
     echo "  $DOCKER       Docker helper."
-	echo "  $GCLOUD       Kubernetes helper."
+	echo "  $GCLOUD       Gcloud helper."
+	echo "  $AZURE        Azure helper."
 	echo "  $KUBERNETES   Kubernetes helper."
 	echo ""
 	echo "Clipboard:"
@@ -51,10 +52,6 @@ environment_help() {
 	echo "  -h, --help    Prints usage."
 	echo ""
     echo "Commands:"
-	contains $environment ${KUBE_ENVIRONMENTS[@]}
-	if [ $? -eq 1 ]; then
-		echo "  $SET_CLUSTER      Switch cluster."
-	fi
 	echo "  $BUILD        Build, tag and push image(s)."
 	echo "  $RUN          Run deployment."
     echo "  $STOP         Stop deployment."
@@ -81,7 +78,7 @@ environment_arguments_parser() {
 	fi
 
 	# Commands
-	if [[ $1 = $SET_CLUSTER ]] || [[ $1 = $BUILD ]] || [[ $1 = $RUN ]] || [[ $1 = $STOP ]] || [[ $1 = $SSH ]] || [[ $1 = $LOG ]] || [[ $1 = $LS ]] || [[ $1 = $URL ]]; then
+	if [[ $1 = $BUILD ]] || [[ $1 = $RUN ]] || [[ $1 = $STOP ]] || [[ $1 = $SSH ]] || [[ $1 = $LOG ]] || [[ $1 = $LS ]] || [[ $1 = $URL ]]; then
 		return 1
 	fi
 }
@@ -147,15 +144,7 @@ if [ $? -eq 1 ]; then
 	 	environment_help $environment
 	else
 		load_containers $environment
-		
-		# Load environment file
-		env_file=$(get_config $environment "_ENV" ${ALL_ENVIRONMENTS[@]})
-		env_file="$PWD/$env_file"
-		if [ ! -f $env_file ]; then
-			echo "'$env_file' not found!"
-			exit
-		fi
-		source $env_file
+		load_environment_file $environment
 		
 		contains $environment ${DOCKER_ENVIRONMENTS[@]}
 		if [ $? -eq 1 ]; then
