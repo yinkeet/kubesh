@@ -36,6 +36,7 @@ source "$HOME_PATH/scripts/ls.sh"
 source "$HOME_PATH/scripts/url.sh"
 source "$HOME_PATH/scripts/docker.sh"
 source "$HOME_PATH/scripts/gcloud.sh"
+source "$HOME_PATH/scripts/azure.sh"
 source "$HOME_PATH/scripts/kubernetes.sh"
 source "$HOME_PATH/scripts/main.sh"
 
