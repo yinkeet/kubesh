@@ -68,7 +68,7 @@ _environments_completions() {
 
     contains ${COMP_WORDS[1]} ${KUBE_ENVIRONMENTS[@]}
     if [ $? -eq 1 ]; then
-        args=( "$SET_CLUSTER $BUILD $RUN $STOP $SSH $LOG $LS $URL" )
+        args=( "$CLUSTER_COMMAND $BUILD $RUN $STOP $SSH $LOG $LS $URL" )
     fi
 
     if [ "${COMP_WORDS[1]}" == "$DOCKER" ]; then

@@ -10,7 +10,7 @@ gcloud_help() {
 	echo ""
     echo "Commands:"
 	echo "  $AUTH         Authenticate using the supplied json file."
-	echo "  $SET_CLUSTER      Switch cluster."
+	echo "  $CLUSTER_COMMAND      Switch cluster."
 	echo ""
 	exit
 }
@@ -44,7 +44,7 @@ gcloud_cluster_help() {
 	done
 
 	echo ""
-	echo "Usage: ./kubesh $GCLOUD $SET_CLUSTER ENVIRONMENT"
+	echo "Usage: ./kubesh $GCLOUD $CLUSTER_COMMAND ENVIRONMENT"
     echo "       ./kubesh [ -h | --help ]"
 	echo ""
 	echo "Options:"
@@ -68,7 +68,7 @@ gcloud_arguments_parser() {
 	fi
 
 	# Cleanup
-	if [[ $1 = $AUTH ]] || [[ $1 = $SET_CLUSTER ]]; then
+	if [[ $1 = $AUTH ]] || [[ $1 = $CLUSTER_COMMAND ]]; then
 		return 1
 	fi
 }
@@ -140,6 +140,7 @@ gcloud_cluster() {
 
 	local environment=$1
 	load_environment_file $environment
+	gcloud container clusters get-credentials $CLUSTER --zone $ZONE --project $PROJECT_NAME
 }
 
 if [[ $1 = $GCLOUD ]]; then
@@ -152,7 +153,7 @@ if [[ $1 = $GCLOUD ]]; then
 			shift
 			gcloud_auth $@
 			exit
-		elif [[ $1 = $SET_CLUSTER ]]; then
+		elif [[ $1 = $CLUSTER_COMMAND ]]; then
 			shift
 			gcloud_cluster $@
 			exit

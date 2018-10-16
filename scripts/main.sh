@@ -110,10 +110,7 @@ dev_commands_exec() {
 kube_commands_exec() {
 	local environment=$1
 	shift
-	if [[ $1 = $SET_CLUSTER ]]; then
-		shift
-		gcloud container clusters get-credentials $CLUSTER --zone $ZONE --project $PROJECT_NAME
-	elif [[ $1 = $BUILD ]]; then
+	if [[ $1 = $BUILD ]]; then
 		shift
 		build_kube $environment $@
 	elif [[ $1 = $RUN ]]; then
