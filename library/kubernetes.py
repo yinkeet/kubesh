@@ -62,7 +62,7 @@ class Kubernetes(Environment):
     @Condition('containers', get_containers, 'dockerfile_filename')
     def stop(self, containers=[]):
         self._load_image_name(containers)
-        run(['kubectl', 'delete', '-f', '-'], input=self.__load_deployment_file(), encoding='UTF-8')
+        run(['kubectl', 'delete', '-f', '-'], input=load_deployment_file(self.deployment_filename), encoding='UTF-8')
 
     def logs(self, containers=[], pod=None, container=None, follow=False):
         command = ['kubectl', 'logs', pod, container]
