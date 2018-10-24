@@ -1,0 +1,55 @@
+{
+    "environments": {
+        "dev": {
+            "type": "docker",
+            "name": "Development",
+            "production": false,
+            "description": "Development environment.",
+            "environment_filename": "dev.env",
+            "deployment_filename": "docker-compose.yml",
+            "dockerfile_filename": "Dockerfile"
+        },
+        "minikube": {
+            "type": "minikube",
+            "name": "Minikube",
+            "production": false,
+            "description": "Minikube environment.",
+            "environment_filename": "minikube.env",
+            "deployment_filename": "deployment.minikube.yaml",
+            "dockerfile_filename": "Dockerfile-minikube"
+        },
+        "test": {
+            "type": "kubernetes",
+            "name": "Test",
+            "production": false,
+            "description": "Test environment.",
+            "environment_filename": "test.env",
+            "deployment_filename": "deployment.test.yaml",
+            "dockerfile_filename": "Dockerfile-test"
+        },
+        "stage": {
+            "type": "kubernetes",
+            "name": "Stage",
+            "production": false,
+            "description": "Stage environment.",
+            "environment_filename": "stage.env",
+            "deployment_filename": "deployment.stage.yaml",
+            "dockerfile_filename": "Dockerfile-stage"
+        },
+        "prod": {
+            "type": "kubernetes",
+            "name": "Production",
+            "production": true,
+            "description": "Production environment.",
+            "environment_filename": "prod.env",
+            "deployment_filename": "deployment.prod.yaml",
+            "dockerfile_filename": "Dockerfile-prod"
+        }
+    },
+    "templates": {
+        "aks_short_image_name": "$APP/__CONTAINER__",
+        "aks_image_name": "$CONTAINER_REGISTRY/$APP/__CONTAINER__",
+        "gcr_image_name": "$CONTAINER_REGISTRY/$PROJECT/$APP/__CONTAINER__",
+        "minikube_image_name": "$CONTAINER_REGISTRY/$APP/__CONTAINER__"
+    }
+}
