@@ -10,57 +10,29 @@ from kubernetes import Kubernetes
 
 
 class GKE(Kubernetes):
-    def image_name_template(self):
-        return self.templates['google_image_name']
-    
-    def get_image_name_with_digest(self, image_name: str):
-        return image_name + '@123'
-    
-    def __get_image_name_with_digest(self, image_name):
-        return check_output(['docker', 'image', 'inspect', image_name + ':latest', '-f', '{{index .RepoDigests 0}}']).decode('UTF-8')
+    def get_build_image_name(self, container: str) -> str:
+        image_name = generate_image_name(container, self.templates['gcr_image_name'])
+        if not self.production:
+            image_name += ':latest'
+        else:
+            with open(container + '/tag') as tag:
+                image_name += ':' + tag.read()
+        return image_name
 
-    def __load_image_names(self, containers=[]):
+    def get_deployment_image_name(self, container: str) -> str:
+        image_name = generate_image_name(container, self.templates['gcr_image_name'])
+        if not self.production:
+            image_name += ':latest'
+        else:
+            with open(container + '/tag') as tag:
+                image_name += ':' + tag.read()
+        digest = check_output(['gcloud', 'container', 'images', 'describe', image_name, '--format="value(image_summary.digest)"']).decode('UTF-8').replace('\n', '')
+        return self.get_build_image_name(container) + '@' + digest
+
+    def container_built_and_pushed(self, container: str) -> bool:
         variables = load_environment_variables(['AZURE_CONTAINER_REGISTRY_NAME'])
-        print('Loading image names... ', end='', flush=True)
-        if not containers:
-            containers = self.__get_containers()
-        for container in containers:
-            image_name = self.__generate_image_names(container)
-            # az acr repository show --name bambu --image node-boilerplate/test/node:latest --query 'digest' --output tsv
-            image_name += '@' + check_output(['az', 'acr', 'repository', 'show', '--name', variables['AZURE_CONTAINER_REGISTRY_NAME'], '--image', image_name + ':latest', '--query', 'digest', '--output', 'tsv']).decode('UTF-8').replace('\n', '')
-            os.environ[container.upper() + '_IMAGE_NAME'] = image_name
-        print('done')
-
-    def stop(self, containers=[]):
-        self.__minikube_health_checker()
-
-        self.__load_image_names(containers)
-
-        data = self.__load_deployment_file()
-
-        # Stop the deployment
-        print('Stopping deployment...')
-        run(['kubectl', 'delete', '-f', '-'], input=data, encoding='UTF-8')
-        print('done')
-
-    def logs(self, containers=[], pod=None, container=None, follow=False):
-        self.__minikube_health_checker()
-        command = ['kubectl', 'logs', pod, container]
-        if follow:
-            command.append('-f')
-        try:
-            call(command)
-        except KeyboardInterrupt:
-            print('')
-            sys.exit(0)
-
-    def ssh(self, pod=None, container=None, command=None, args=None):
-        self.__minikube_health_checker()
-        command = ['kubectl', 'exec', '-it', pod, '--container=' + container, '--', command]
-        if args:
-            command.extend(args)
-        call(command)
-
-    def url(self):
-        self.__minikube_health_checker()
-        print('http://' + check_output(['minikube', 'ip']).decode('UTF-8').replace('\n', '') + '/')
+        acr_name = variables['AZURE_CONTAINER_REGISTRY_NAME']
+        image_name = generate_image_name(container, self.templates['aks_short_image_name'])
+        with open(container + '/tag') as tag:
+            image_name += ':' + tag.read()
+        return call(['az', 'acr', 'repository', 'show', '--name', acr_name, '--image', image_name], stdout=PIPE, stderr=PIPE) == 0
