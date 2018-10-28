@@ -57,7 +57,7 @@ def load_environment_variables(variables=[]):
     
     return results
 
-def generate_image_name(container, image_name_template):
+def generate_image_name(container: str, image_name_template: str) -> str:
     template = os.path.expandvars(image_name_template)
     return template.replace('__CONTAINER__', container)
 
