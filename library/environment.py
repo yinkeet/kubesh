@@ -34,7 +34,3 @@ class Environment(ABC):
     @abstractmethod
     def ssh(self, pod: str=None, container: str=None, command: str=None, args: List[str]=[]):
         pass
-
-    def generate_image_name(container: str, image_name_template: str) -> str:
-        template = os.path.expandvars(image_name_template)
-        return template.replace('__CONTAINER__', container)
