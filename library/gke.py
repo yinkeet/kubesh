@@ -10,8 +10,12 @@ from kubernetes import Kubernetes
 
 
 class GKE(Kubernetes):
+    @property
+    def image_name_template(self) -> str:
+        return self.templates.get('gcr_image_name', '$CONTAINER_REGISTRY/$PROJECT/$APP/__CONTAINER__')
+
     def get_build_image_name(self, container: str) -> str:
-        image_name = generate_image_name(container, self.templates['gcr_image_name'])
+        image_name = generate_image_name(container, self.image_name_template)
         if not self.production:
             image_name += ':latest'
         else:
@@ -20,7 +24,7 @@ class GKE(Kubernetes):
         return image_name
 
     def get_deployment_image_name(self, container: str) -> str:
-        image_name = generate_image_name(container, self.templates['gcr_image_name'])
+        image_name = generate_image_name(container, self.image_name_template)
         if not self.production:
             image_name += ':latest'
         else:
@@ -29,7 +33,7 @@ class GKE(Kubernetes):
         return check_output(['gcloud', 'container', 'images', 'describe', image_name, '--format="value(image_summary.fully_qualified_digest)"']).decode('UTF-8').replace('\n', '')
 
     def container_built_and_pushed(self, container: str) -> bool:
-        image_name = generate_image_name(container, self.templates['gcr_image_name'])
+        image_name = generate_image_name(container, self.image_name_template)
         with open(container + '/tag') as tag:
             image_name += ':' + tag.read()
         return call(['gcloud', 'container', 'images', 'describe', image_name], stdout=PIPE, stderr=PIPE) == 0
@@ -53,7 +57,7 @@ class GKE(Kubernetes):
     def clean_up(self, containers: List[str]=[]):
         untagged_images = []
         for container in containers:
-            image_name = generate_image_name(container, self.templates['gcr_image_name'])
+            image_name = generate_image_name(container, self.image_name_template)
             digests = check_output(
                 ['gcloud', 'container', 'images', 'list-tags', image_name, '--filter=-tags:*', '--limit=unlimited', '--format=get(digest)']
             ).decode('UTF-8').splitlines()

@@ -9,6 +9,11 @@ class Environment(ABC):
         self.dockerfile_filename = info['dockerfile_filename']
         self.production = info['production']
         self.templates = templates
+
+    @property
+    @abstractmethod
+    def image_name_template(self) -> str:
+        pass
     
     @abstractmethod
     def build(self, containers: List[str]=[]):

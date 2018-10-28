@@ -5,8 +5,16 @@ from kubernetes import Kubernetes
 
 
 class AKS(Kubernetes):
+    @property
+    def image_name_template(self) -> str:
+        return self.templates.get('aks_image_name', '$CONTAINER_REGISTRY/$APP/__CONTAINER__')
+
+    @property
+    def short_image_name_template(self) -> str:
+        return self.templates.get('aks_short_image_name', '$APP/__CONTAINER__')
+
     def get_build_image_name(self, container: str) -> str:
-        image_name = generate_image_name(container, self.templates['aks_image_name'])
+        image_name = generate_image_name(container, self.image_name_template)
         if not self.production:
             image_name += ':latest'
         else:
@@ -17,7 +25,7 @@ class AKS(Kubernetes):
     def get_deployment_image_name(self, container: str) -> str:
         variables = load_environment_variables(['AZURE_CONTAINER_REGISTRY_NAME'])
         acr_name = variables['AZURE_CONTAINER_REGISTRY_NAME']
-        short_image_name = generate_image_name(container, self.templates['aks_short_image_name'])
+        short_image_name = generate_image_name(container, self.short_image_name_template)
         if not self.production:
             short_image_name += ':latest'
         else:
@@ -29,7 +37,7 @@ class AKS(Kubernetes):
     def container_built_and_pushed(self, container: str) -> bool:
         variables = load_environment_variables(['AZURE_CONTAINER_REGISTRY_NAME'])
         acr_name = variables['AZURE_CONTAINER_REGISTRY_NAME']
-        image_name = generate_image_name(container, self.templates['aks_short_image_name'])
+        image_name = generate_image_name(container, self.short_image_name_template)
         with open(container + '/tag') as tag:
             image_name += ':' + tag.read()
         return call(['az', 'acr', 'repository', 'show', '--name', acr_name, '--image', image_name], stdout=PIPE, stderr=PIPE) == 0
