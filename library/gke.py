@@ -2,10 +2,10 @@ import os
 import sys
 from subprocess import PIPE, CalledProcessError, call, check_output, run
 from time import sleep
+from typing import List
 
-import requests
-
-from common import load_environment_variables
+from common import (Condition, WrapPrint, generate_image_name, get_containers,
+                    load_environment_variables)
 from kubernetes import Kubernetes
 
 
@@ -26,13 +26,42 @@ class GKE(Kubernetes):
         else:
             with open(container + '/tag') as tag:
                 image_name += ':' + tag.read()
-        digest = check_output(['gcloud', 'container', 'images', 'describe', image_name, '--format="value(image_summary.digest)"']).decode('UTF-8').replace('\n', '')
-        return self.get_build_image_name(container) + '@' + digest
+        return check_output(['gcloud', 'container', 'images', 'describe', image_name, '--format="value(image_summary.fully_qualified_digest)"']).decode('UTF-8').replace('\n', '')
 
     def container_built_and_pushed(self, container: str) -> bool:
-        variables = load_environment_variables(['AZURE_CONTAINER_REGISTRY_NAME'])
-        acr_name = variables['AZURE_CONTAINER_REGISTRY_NAME']
-        image_name = generate_image_name(container, self.templates['aks_short_image_name'])
+        image_name = generate_image_name(container, self.templates['gcr_image_name'])
         with open(container + '/tag') as tag:
             image_name += ':' + tag.read()
-        return call(['az', 'acr', 'repository', 'show', '--name', acr_name, '--image', image_name], stdout=PIPE, stderr=PIPE) == 0
+        return call(['gcloud', 'container', 'images', 'describe', image_name], stdout=PIPE, stderr=PIPE) == 0
+
+    @WrapPrint('Creating image pull secret... ', 'done')
+    def image_pull_secret(self):
+        variables = load_environment_variables([
+            'IMAGE_PULL_SECRET_NAME', 'IMAGE_PULL_SECRET_SERVER', 'IMAGE_PULL_SECRET_USERNAME', 'IMAGE_PULL_SECRET_PASSWORD', 'IMAGE_PULL_SECRET_EMAIL'
+        ])
+        name = variables['IMAGE_PULL_SECRET_NAME']
+        server = variables['IMAGE_PULL_SECRET_SERVER']
+        username = variables['IMAGE_PULL_SECRET_USERNAME']
+        with open(variables['IMAGE_PULL_SECRET_PASSWORD']) as text_file:
+            password = text_file.read()
+        email = variables['IMAGE_PULL_SECRET_EMAIL']
+        data = check_output(['kubectl', 'create', 'secret', 'docker-registry', name, '--docker-server', server, '--docker-username', username, '--docker-password', password, '--docker-email', email, '--dry-run', '-o', 'yaml']).decode('UTF-8')
+        run(['kubectl', 'apply', '-f', '-'], input=data, encoding='UTF-8', stdout=PIPE)
+
+    @WrapPrint('Cleaning up... ', 'done')
+    @Condition('containers', get_containers, 'dockerfile_filename')
+    def clean_up(self, containers: List[str]=[]):
+        untagged_images = []
+        for container in containers:
+            image_name = generate_image_name(container, self.templates['gcr_image_name'])
+            digests = check_output(
+                ['gcloud', 'container', 'images', 'list-tags', image_name, '--filter=-tags:*', '--limit=unlimited', '--format=get(digest)']
+            ).decode('UTF-8').splitlines()
+            untagged_images.extend(
+                [image_name + '@' + digest for digest in digests]
+            )
+            
+        if untagged_images:
+            for untagged_image in untagged_images:
+                command = ['gcloud', 'container', 'images', 'delete', '--quiet', untagged_image]
+                call(command, stdout=PIPE)

@@ -2,7 +2,6 @@ import os
 from abc import ABC, abstractmethod
 from typing import List
 
-
 class Environment(ABC):
     def __init__(self, info: dict, templates: dict):
         super().__init__()
@@ -21,6 +20,10 @@ class Environment(ABC):
 
     @abstractmethod
     def run(self, containers: List[str]=[]):
+        pass
+
+    @abstractmethod
+    def clean_up(self, containers: List[str]=[]):
         pass
 
     @abstractmethod

@@ -21,19 +21,6 @@ class Kubernetes(Environment):
     def container_built_and_pushed(self, container: str) -> bool:
         pass
 
-    @WrapPrint('Creating image pull secret... ', 'done')
-    def create_image_pull_secret():
-        variables = load_environment_variables([
-            'IMAGE_PULL_SECRET_NAME', 'IMAGE_PULL_SECRET_SERVER', 'IMAGE_PULL_SECRET_USERNAME', 'IMAGE_PULL_SECRET_PASSWORD', 'IMAGE_PULL_SECRET_EMAIL'
-        ])
-        name = variables['IMAGE_PULL_SECRET_NAME']
-        server = variables['IMAGE_PULL_SECRET_SERVER']
-        username = variables['IMAGE_PULL_SECRET_USERNAME']
-        password = variables['IMAGE_PULL_SECRET_PASSWORD']
-        email = variables['IMAGE_PULL_SECRET_EMAIL']
-        data = check_output(['kubectl', 'create', 'secret', 'docker-registry', name, '--docker-server', server, '--docker-username', username, '--docker-password', password, '--docker-email', email, '--dry-run', '-o', 'yaml']).decode('UTF-8')
-        run(['kubectl', 'apply', '-f', '-'], input=data, encoding='UTF-8', stdout=PIPE)
-
     @Condition('containers', get_containers, 'dockerfile_filename')
     def build(self, containers=[]):
         for container in containers:
@@ -53,9 +40,21 @@ class Kubernetes(Environment):
         self._load_image_name(get_containers(self.dockerfile_filename))
         print('\n' + load_deployment_file(self.deployment_filename) + '\n')
 
+    @WrapPrint('Creating image pull secret... ', 'done')
+    def image_pull_secret(self):
+        variables = load_environment_variables([
+            'IMAGE_PULL_SECRET_NAME', 'IMAGE_PULL_SECRET_SERVER', 'IMAGE_PULL_SECRET_USERNAME', 'IMAGE_PULL_SECRET_PASSWORD', 'IMAGE_PULL_SECRET_EMAIL'
+        ])
+        name = variables['IMAGE_PULL_SECRET_NAME']
+        server = variables['IMAGE_PULL_SECRET_SERVER']
+        username = variables['IMAGE_PULL_SECRET_USERNAME']
+        password = variables['IMAGE_PULL_SECRET_PASSWORD']
+        email = variables['IMAGE_PULL_SECRET_EMAIL']
+        data = check_output(['kubectl', 'create', 'secret', 'docker-registry', name, '--docker-server', server, '--docker-username', username, '--docker-password', password, '--docker-email', email, '--dry-run', '-o', 'yaml']).decode('UTF-8')
+        run(['kubectl', 'apply', '-f', '-'], input=data, encoding='UTF-8', stdout=PIPE)
+
     @Condition('containers', get_containers, 'dockerfile_filename')
     def run(self, containers=[]):
-        Kubernetes.create_image_pull_secret()
         self._load_image_name(containers)
         run(['kubectl', 'apply', '-f', '-'], input=load_deployment_file(self.deployment_filename), encoding='UTF-8')
 

@@ -57,6 +57,8 @@ else:
         instance = Docker(info, settings['templates'])
         if args.operation == 'config':
             instance.config()
+        elif args.operation == 'clean_up':
+            instance.clean_up(containers=args.containers)
         elif args.operation == 'logs':
             instance.logs(containers=args.containers, follow=args.follow)
         elif args.operation == 'ssh':
@@ -69,6 +71,8 @@ else:
         instance = Minikube(info, settings['templates'])
         if args.operation == 'config':
             instance.config()
+        elif args.operation == 'clean_up':
+            instance.clean_up(containers=args.containers)
         elif args.operation == 'logs':
             instance.logs(pod=args.pod, container=args.container, follow=args.follow)
         elif args.operation == 'ssh':
@@ -94,6 +98,8 @@ else:
             instance.image_pull_secret()
         elif args.operation == 'run':
             instance.run(containers=args.containers)
+        elif args.operation == 'clean_up':
+            instance.clean_up(containers=args.containers)
         elif args.operation == 'stop':
             instance.stop(containers=args.containers)
         elif args.operation == 'logs':
