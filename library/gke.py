@@ -65,3 +65,12 @@ class GKE(Kubernetes):
             for untagged_image in untagged_images:
                 command = ['gcloud', 'container', 'images', 'delete', '--quiet', untagged_image]
                 call(command, stdout=PIPE)
+
+    def auth(self):
+        variables = load_environment_variables(['GOOGLE_AUTH_KEY_FILE'])
+        call(['gcloud', 'auth', 'activate-service-account', '--key-file', variables['GOOGLE_AUTH_KEY_FILE']])
+        call(['docker-credential-gcr', 'configure-docker'])
+
+    def cluster(self):
+        variables = load_environment_variables(['CLUSTER', 'ZONE', 'PROJECT'])
+        call(['gcloud', 'container', 'clusters', 'get-credentials', variables['CLUSTER'], '--zone', variables['ZONE'], '--project', variables['PROJECT']])

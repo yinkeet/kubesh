@@ -1,6 +1,6 @@
 from subprocess import call, check_output, PIPE
 
-from common import load_environment_variables, generate_image_name
+from common import load_environment_variables, generate_image_name, WrapPrint
 from kubernetes import Kubernetes
 
 
@@ -33,3 +33,22 @@ class AKS(Kubernetes):
         with open(container + '/tag') as tag:
             image_name += ':' + tag.read()
         return call(['az', 'acr', 'repository', 'show', '--name', acr_name, '--image', image_name], stdout=PIPE, stderr=PIPE) == 0
+
+    def auth(self):
+        variables = load_environment_variables(['AZURE_APP_ID', 'AZURE_PASSWORD', 'AZURE_TENANT', 'AZURE_CONTAINER_REGISTRY_NAME'])
+        self._azure_login(variables['AZURE_APP_ID'], variables['AZURE_PASSWORD'], variables['AZURE_TENANT'])
+        self._azure_acr_login(variables['AZURE_CONTAINER_REGISTRY_NAME'])
+
+    @WrapPrint('Logging in azure... ', 'done')
+    def _azure_login(self, app_id: str, password: str, tenant: str):
+        call(['az', 'login', '--service-principal', '-u', app_id, '-p', password, '--tenant', tenant], stdout=PIPE)
+
+    @WrapPrint('Logging in azure container registry... ', 'done')
+    def _azure_acr_login(self, name: str):
+        call(['az', 'acr', 'login', '--name', name], stdout=PIPE)
+
+    def cluster(self):
+        variables = load_environment_variables(['AZURE_RESOURCE_GROUP', 'CLUSTER'])
+        print('Pointing to azure \'' + variables['CLUSTER'] + '\' cluster... ', end='', flush=True)
+        call(['az', 'aks', 'get-credentials', '--resource-group', variables['AZURE_RESOURCE_GROUP'], '--name', variables['CLUSTER'], '--overwrite-existing'], stdout=PIPE)
+        print('done')
