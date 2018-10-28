@@ -42,11 +42,13 @@ class Docker(Environment):
             command.extend(args)
         call(command)
 
+    @staticmethod
     def cleanup():
         Docker.remove_stopped_containers()
         Docker.remove_untagged_images()
         Docker.remove_unused_volumes()
 
+    @staticmethod
     def remove_stopped_containers():
         print('Removing stopped containers... ', end='', flush=True)
         stopped_containers = check_output(
@@ -59,16 +61,19 @@ class Docker(Environment):
             call(command, stdout=PIPE)
         print('done')
 
+    @staticmethod
     def remove_untagged_images():
         print('Removing untagged images... ', end='', flush=True)
         call(['docker', 'image', 'prune', '-f'], stdout=PIPE)
         print('done')
 
+    @staticmethod
     def remove_unused_volumes():
         print('Removing unused volumes... ', end='', flush=True)
         call(['docker', 'volume', 'prune', '-f'], stdout=PIPE)
         print('done')
 
+    @staticmethod
     def kill():
         print('Killing all images... ', end='', flush=True)
         call(['docker', 'image', 'prune', '-a', '-f'], stdout=PIPE)
