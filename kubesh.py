@@ -90,6 +90,8 @@ else:
             instance.build(containers=args.containers)
         elif args.operation == 'config':
             instance.config()
+        elif args.operation == 'image_pull_secret':
+            instance.image_pull_secret()
         elif args.operation == 'run':
             instance.run(containers=args.containers)
         elif args.operation == 'stop':
