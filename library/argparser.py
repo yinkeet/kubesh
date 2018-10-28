@@ -55,7 +55,7 @@ class KubeshArgumentParser():
         parser.add_argument('command', help='Command to execute')
         parser.add_argument('args', nargs='*', help='Command arguments')
         # Auth and cluster
-        if type == 'minikube' or type == 'kubernetes':
+        if type == 'kubernetes':
             # Auth
             subparsers.add_parser('auth', help='Authenticate this machine.')
             # Cluster
