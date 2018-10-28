@@ -13,12 +13,12 @@ class KubeshArgumentParser():
             self.__setup_operation_parsers(parser, setting['type'])
         parser = subparsers.add_parser('docker', help='Docker helper.')
         self.__setup_docker_parsers(parser)
-        parser = subparsers.add_parser('kubernetes', help='Kubernetes helper.')
-        self.__setup_kubernetes_parsers(parser)
-        parser = subparsers.add_parser('azure', help='Azure helper.')
-        self.__setup_cloud_service_parsers(parser)
-        parser = subparsers.add_parser('google', help='Google helper.')
-        self.__setup_cloud_service_parsers(parser)
+        # parser = subparsers.add_parser('kubernetes', help='Kubernetes helper.')
+        # self.__setup_kubernetes_parsers(parser)
+        # parser = subparsers.add_parser('azure', help='Azure helper.')
+        # self.__setup_cloud_service_parsers(parser)
+        # parser = subparsers.add_parser('google', help='Google helper.')
+        # self.__setup_cloud_service_parsers(parser)
 
     def __setup_operation_parsers(self, parent_parser, type):
         subparsers = parent_parser.add_subparsers(title='Operations', dest='operation', required=True, help='Operation to execute')
@@ -27,9 +27,15 @@ class KubeshArgumentParser():
         parser.add_argument('containers', nargs='*', help='Containers to build')
         # Config
         parser = subparsers.add_parser('config', help='Show deployment config yaml.')
+        # Image pull secret
+        if type == 'kubernetes':
+            parser = subparsers.add_parser('image_pull_secret', help='Creates an image pull secret.')
         # Run
         parser = subparsers.add_parser('run', help='Run deployment.')
         parser.add_argument('containers', nargs='*', help='Containers to run')
+        # Remove untagged images
+        parser = subparsers.add_parser('clean_up', help='Remove untagged images.')
+        parser.add_argument('containers', nargs='*', help='Containers to clean')
         # Stop
         parser = subparsers.add_parser('stop', help='Stop deployment.')
         parser.add_argument('containers', nargs='*', help='Containers to stop')
@@ -48,34 +54,39 @@ class KubeshArgumentParser():
         parser.add_argument('container', help='Container to tunnel into')
         parser.add_argument('command', help='Command to execute')
         parser.add_argument('args', nargs='*', help='Command arguments')
+        # Auth and cluster
+        if type == 'minikube' or type == 'kubernetes':
+            # Auth
+            subparsers.add_parser('auth', help='Authenticate this machine.')
+            # Cluster
+            subparsers.add_parser('cluster', help='Switch cluster.')
+        
 
     def __setup_docker_parsers(self, parent_parser):
         subparsers = parent_parser.add_subparsers(title='Operations', dest='operation', required=True, help='Operation to execute')
         # Clean up
-        parser = subparsers.add_parser('cleanup', help='Build, tag and push image(s).')
-        parser.add_argument('containers', nargs='*', help='Containers to build')
+        subparsers.add_parser('cleanup', help='Removes stopped containers, followed by untagged images and then unused volumes.')
         # Kill
-        parser = subparsers.add_parser('kill', help='Removes stopped containers, followed by untagged images and then unused volumes.')
-        parser.add_argument('containers', nargs='*', help='Forcefully removes all images.')
+        subparsers.add_parser('kill', help='Forcefully removes all images.')
 
-    def __setup_kubernetes_parsers(self, parent_parser):
-        subparsers = parent_parser.add_subparsers(title='Operations', dest='operation', required=True, help='Operation to execute')
-        # Image pull secret
-        parser = subparsers.add_parser('image_pull_secret', help='Creates an image pull secret.')
-        parser.add_argument('name', help='Environment name.')
+    # def __setup_kubernetes_parsers(self, parent_parser):
+    #     subparsers = parent_parser.add_subparsers(title='Operations', dest='operation', required=True, help='Operation to execute')
+    #     # Image pull secret
+    #     parser = subparsers.add_parser('image_pull_secret', help='Creates an image pull secret.')
+    #     parser.add_argument('name', help='Environment name.')
 
-    def __setup_cloud_service_parsers(self, parent_parser):
-        subparsers = parent_parser.add_subparsers(title='Operations', dest='operation', required=True, help='Operation to execute')
-        choices = []
-        for id, setting in self.settings['environments'].items():
-            if setting['type'] == 'kubernetes':
-                choices.append(id)
-        # Auth
-        parser = subparsers.add_parser('auth', help='Authenticate this machine.')
-        parser.add_argument('name', choices=choices, help='Environment name.')
-        # Cluster
-        parser = subparsers.add_parser('cluster', help='Switch cluster.')
-        parser.add_argument('name', choices=choices, help='Environment name.')
+    # def __setup_cloud_service_parsers(self, parent_parser):
+    #     subparsers = parent_parser.add_subparsers(title='Operations', dest='operation', required=True, help='Operation to execute')
+    #     choices = []
+    #     for id, setting in self.settings['environments'].items():
+    #         if setting['type'] == 'kubernetes':
+    #             choices.append(id)
+    #     # Auth
+    #     parser = subparsers.add_parser('auth', help='Authenticate this machine.')
+    #     parser.add_argument('name', choices=choices, help='Environment name.')
+    #     # Cluster
+    #     parser = subparsers.add_parser('cluster', help='Switch cluster.')
+    #     parser.add_argument('name', choices=choices, help='Environment name.')
 
     def run(self):
         parser = ArgumentParser(
