@@ -78,3 +78,11 @@ class Kubernetes(Environment):
         if args:
             command.extend(args)
         call(command)
+
+    @abstractmethod
+    def auth(self):
+        pass
+
+    @abstractmethod
+    def cluster(self):
+        pass
