@@ -3,7 +3,9 @@ from functools import partial, wraps
 from subprocess import CalledProcessError, check_output
 from sys import exit
 
+import yaml
 from dotenv import load_dotenv
+
 
 class Condition(object):
     def __init__(self, kwarg_name, func, *args):
@@ -79,6 +81,14 @@ def minikube_health_checker(func):
             exit(1)
         func(*args, **kwargs)
     return wrapper
+
+def get_services(deployment_filename: str):
+    with open(deployment_filename, 'r') as stream:
+        try:
+            return [service for service, details in yaml.load(stream)['services'].items()]
+        except yaml.YAMLError as error:
+            print(error)
+            exit(1)
 
 def get_containers(dockerfile_filename):
     return check_output(
