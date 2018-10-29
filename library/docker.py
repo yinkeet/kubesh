@@ -10,7 +10,10 @@ from environment import Environment
 class Docker(Environment):
     @property
     def image_name_template(self):
-        return self.templates.get('docker_image_name', '__DIRECTORY_NAME_____CONTAINER__')
+        if self.templates is None:
+            return '__DIRECTORY_NAME_____CONTAINER__'
+        else:
+            return self.templates.get('docker_image_name', '__DIRECTORY_NAME_____CONTAINER__')
 
     def build(self, containers: List[str]=[]):
         command = ['docker-compose', '-f', self.deployment_filename, 'build']

@@ -1,17 +1,24 @@
-from subprocess import call, check_output, PIPE
+from subprocess import PIPE, call, check_output
+from typing import List
 
-from common import load_environment_variables, generate_image_name, WrapPrint
+from common import WrapPrint, generate_image_name, load_environment_variables
 from kubernetes import Kubernetes
 
 
 class AKS(Kubernetes):
     @property
     def image_name_template(self) -> str:
-        return self.templates.get('aks_image_name', '$CONTAINER_REGISTRY/$APP/__CONTAINER__')
+        if self.templates is None:
+            return '$CONTAINER_REGISTRY/$APP/__CONTAINER__'
+        else:
+            return self.templates.get('aks_image_name', '$CONTAINER_REGISTRY/$APP/__CONTAINER__')
 
     @property
     def short_image_name_template(self) -> str:
-        return self.templates.get('aks_short_image_name', '$APP/__CONTAINER__')
+        if self.templates is None:
+            return '$APP/__CONTAINER__'
+        else:
+            return self.templates.get('aks_short_image_name', '$APP/__CONTAINER__')
 
     def get_build_image_name(self, container: str) -> str:
         image_name = generate_image_name(container, self.image_name_template)
@@ -41,6 +48,9 @@ class AKS(Kubernetes):
         with open(container + '/tag') as tag:
             image_name += ':' + tag.read()
         return call(['az', 'acr', 'repository', 'show', '--name', acr_name, '--image', image_name], stdout=PIPE, stderr=PIPE) == 0
+
+    def clean_up(self, containers: List[str]=[]):
+        pass
 
     def auth(self):
         variables = load_environment_variables(['AZURE_APP_ID', 'AZURE_PASSWORD', 'AZURE_TENANT', 'AZURE_CONTAINER_REGISTRY_NAME'])

@@ -46,7 +46,7 @@ class_map = {
 klass = class_map[info['type']]
 if isinstance(klass, dict):
     klass = klass[info['cloud_service']]
-instance = klass(info, settings['templates'])
+instance = klass(info, settings.get('templates', None))
 method = getattr(instance, args.operation)
 kwargs = vars(args)
 kwargs.pop('environment', None)

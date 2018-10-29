@@ -12,7 +12,10 @@ from environment import Environment
 class Minikube(Environment):
     @property
     def image_name_template(self) -> str:
-        return self.templates.get('minikube_image_name', 'localhost:5000/$APP/__CONTAINER__')
+        if self.templates is None:
+            return 'localhost:5000/$APP/__CONTAINER__'
+        else:
+            return self.templates.get('minikube_image_name', 'localhost:5000/$APP/__CONTAINER__')
 
     @minikube_health_checker
     @Condition('containers', get_containers, 'dockerfile_filename')
