@@ -10,7 +10,7 @@ class KubeshArgumentParser():
         self.settings = settings
         
     def __setup_environment_parsers(self, parent_parser):
-        subparsers = parent_parser.add_subparsers(title='Environments', dest='environment', help='Environment')
+        subparsers = parent_parser.add_subparsers(title='Environments', dest='environment', required=True, help='Environment')
         for id, setting in self.settings['environments'].items():
             parser = subparsers.add_parser(id, help=setting['description'])
             if type == 'docker':
@@ -20,7 +20,7 @@ class KubeshArgumentParser():
             self.__setup_operation_parsers(parser, setting['type'], containers)
 
     def __setup_operation_parsers(self, parent_parser, type, containers):
-        subparsers = parent_parser.add_subparsers(title='Operations', dest='operation', help='Operation to execute')
+        subparsers = parent_parser.add_subparsers(title='Operations', dest='operation', required=True, help='Operation to execute')
         # Build
         parser = subparsers.add_parser('build', help='Build, tag and push image(s).')
         parser.add_argument('containers', nargs='*', help='Containers to build')
