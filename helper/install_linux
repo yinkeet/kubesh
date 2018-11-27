@@ -1,0 +1,23 @@
+#!/bin/bash
+
+BASH_PROFILE=~/.bashrc
+HOME_PATH="$( cd "$(dirname "$0")" ; pwd -P )"
+EXECUTABLE_PATH="$HOME_PATH/kubesh"
+# BASH_COMPLETION_PATH="$HOME_PATH/scripts/completion.bash"
+
+# No bash_profile, create it
+if [ ! -f $BASH_PROFILE ]
+then
+    touch $BASH_PROFILE
+fi
+
+# bash_profile is not empty, append with some newlines
+if [ -s $BASH_PROFILE ]; then
+    printf '\n\n' >> $BASH_PROFILE
+fi
+
+printf '# Kubesh PATH\n' >> $BASH_PROFILE
+printf 'if [ -f %s ]; then export PATH=%s:$PATH; fi' "'$EXECUTABLE_PATH'" "$HOME_PATH" >> ~/.bash_profile
+
+# printf '\n\n# Kubesh bash completion\n' >> ~/.bash_profile
+# printf 'if [ -f %s ]; then source %s; fi' "'$BASH_COMPLETION_PATH'" "'$BASH_COMPLETION_PATH'" >> ~/.bash_profile
