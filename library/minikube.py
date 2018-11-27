@@ -37,7 +37,7 @@ class Minikube(Environment):
         # Build and push images to local registry
         for container in containers:
             image_name = generate_image_name(container, self.image_name_template)
-            call(['docker', 'build', '--force-rm', '--no-cache', '--rm', '--file', container + '/' + self.dockerfile_filename, '-t', image_name, os.getcwd()])
+            call(['docker', 'build', '--force-rm', '--rm', '--file', container + '/' + self.dockerfile_filename, '-t', image_name, os.getcwd() + '/' + container])
             call(['docker', 'push', image_name])
         stop_local_registry()
 
