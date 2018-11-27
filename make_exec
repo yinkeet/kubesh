@@ -1,4 +1,17 @@
 #!/bin/bash
 
+# Build Linux executable
 docker build -t kubesh_builder_image .
 docker run -it --rm --name kubesh_builder -v "$PWD/dist":/usr/src/app/dist kubesh_builder_image
+cp helper/install_linux dist/install
+tar -zcvf dist/kubesh_linux.tar dist/install dist/kubesh kubesh.json
+
+# Build MacOS executable
+source kubesh/bin/activate
+pip install -r requirements.txt
+
+pyinstaller --clean kubesh.spec
+cp helper/install_mac dist/install
+tar -zcvf dist/kubesh_mac.tar dist/install dist/kubesh kubesh.json
+
+deactivate
