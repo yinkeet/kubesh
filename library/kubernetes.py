@@ -26,7 +26,7 @@ class Kubernetes(Environment):
         for container in containers:
             image_name = self.get_build_image_name(container)
             if not (self.production and self.container_built_and_pushed(container)):
-                call(['docker', 'build', '--force-rm', '--no-cache', '--rm', '--file', container + '/' + self.dockerfile_filename, '-t', image_name, os.getcwd()])
+                call(['docker', 'build', '--force-rm', '--no-cache', '--rm', '--file', container + '/' + self.dockerfile_filename, '-t', image_name, os.getcwd() + '/' + container])
                 call(['docker', 'push', image_name])
             else:
                 print('Image ' + image_name + ' has already been built and pushed to the cloud.')
