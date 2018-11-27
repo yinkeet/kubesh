@@ -63,7 +63,7 @@ class Docker(Environment):
         if containers:
             command.extend(containers)
         try:
-            call(command)
+            call(command, stderr=PIPE)
         except KeyboardInterrupt:
             sys.exit(0)
 
