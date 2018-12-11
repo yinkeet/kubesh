@@ -13,9 +13,9 @@ class GKE(Kubernetes):
     @property
     def image_name_template(self) -> str:
         if self.templates is None:
-            return '$CONTAINER_REGISTRY/$PROJECT/$APP/__CONTAINER__'
+            return '$CONTAINER_REGISTRY/$PROJECT/$NAMESPACE/$APP/__CONTAINER__'
         else:
-            return self.templates.get('gcr_image_name', '$CONTAINER_REGISTRY/$PROJECT/$APP/__CONTAINER__')
+            return self.templates.get('gcr_image_name', '$CONTAINER_REGISTRY/$PROJECT/$NAMESPACE/$APP/__CONTAINER__')
 
     def get_build_image_name(self, container: str) -> str:
         image_name = generate_image_name(container, self.image_name_template)

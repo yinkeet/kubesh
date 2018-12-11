@@ -63,6 +63,10 @@ class Kubernetes(Environment):
         self._load_image_name(containers)
         run(['kubectl', 'delete', '-f', '-'], input=load_deployment_file(self.deployment_filename), encoding='UTF-8')
 
+    def namespace(self):
+        current_context = check_output(['kubectl', 'config', 'current-context']).decode('UTF-8').replace('\n', '')
+        call(['kubectl', 'config', 'set-context', current_context, '--namespace=' + os.getenv('NAMESPACE')])
+
     def logs(self, containers=[], pod=None, container=None, follow=False):
         command = ['kubectl', 'logs', pod, container]
         if follow:

@@ -13,9 +13,9 @@ class Minikube(Environment):
     @property
     def image_name_template(self) -> str:
         if self.templates is None:
-            return 'localhost:5000/$APP/__CONTAINER__'
+            return 'localhost:5000/$NAMESPACE/$APP/__CONTAINER__'
         else:
-            return self.templates.get('minikube_image_name', 'localhost:5000/$APP/__CONTAINER__')
+            return self.templates.get('minikube_image_name', 'localhost:5000/$NAMESPACE/$APP/__CONTAINER__')
 
     @minikube_health_checker
     @Condition('containers', get_containers, 'dockerfile_filename')
@@ -81,6 +81,11 @@ class Minikube(Environment):
     def stop(self, containers=[]):
         self._load_image_names(containers)
         run(['kubectl', 'delete', '-f', '-'], input=load_deployment_file(self.deployment_filename), encoding='UTF-8')
+
+    @minikube_health_checker
+    def namespace(self):
+        current_context = check_output(['kubectl', 'config', 'current-context']).decode('UTF-8').replace('\n', '')
+        call(['kubectl', 'config', 'set-context', current_context, '--namespace=' + os.getenv('NAMESPACE')])
 
     @minikube_health_checker
     def logs(self, containers=[], pod=None, container=None, follow=False):

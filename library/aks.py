@@ -9,9 +9,9 @@ class AKS(Kubernetes):
     @property
     def image_name_template(self) -> str:
         if self.templates is None:
-            return '$CONTAINER_REGISTRY/$APP/__CONTAINER__'
+            return '$CONTAINER_REGISTRY/$NAMESPACE/$APP/__CONTAINER__'
         else:
-            return self.templates.get('aks_image_name', '$CONTAINER_REGISTRY/$APP/__CONTAINER__')
+            return self.templates.get('aks_image_name', '$CONTAINER_REGISTRY/$NAMESPACE/$APP/__CONTAINER__')
 
     @property
     def short_image_name_template(self) -> str:
@@ -57,11 +57,11 @@ class AKS(Kubernetes):
         self._azure_login(variables['AZURE_APP_ID'], variables['AZURE_PASSWORD'], variables['AZURE_TENANT'])
         self._azure_acr_login(variables['AZURE_CONTAINER_REGISTRY_NAME'])
 
-    @WrapPrint('Logging in azure... ', 'done')
+    @WrapPrint('Logging into azure... ', 'done')
     def _azure_login(self, app_id: str, password: str, tenant: str):
         call(['az', 'login', '--service-principal', '-u', app_id, '-p', password, '--tenant', tenant], stdout=PIPE)
 
-    @WrapPrint('Logging in azure container registry... ', 'done')
+    @WrapPrint('Logging into azure container registry... ', 'done')
     def _azure_acr_login(self, name: str):
         call(['az', 'acr', 'login', '--name', name], stdout=PIPE)
 

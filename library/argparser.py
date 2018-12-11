@@ -17,6 +17,7 @@ class KubeshArgumentParser():
                 containers = get_services(setting['deployment_filename'])
             else:
                 containers = get_containers(setting['dockerfile_filename'])
+                containers.extend(setting.get('containers', []))
             self.__setup_operation_parsers(parser, setting['type'], containers)
 
     def __setup_operation_parsers(self, parent_parser, type, containers):
@@ -38,6 +39,9 @@ class KubeshArgumentParser():
         # Stop
         parser = subparsers.add_parser('stop', help='Stop deployment.')
         parser.add_argument('containers', nargs='*', help='Containers to stop')
+        # Namespace
+        if type != 'docker':
+            parser = subparsers.add_parser('namespace', help='Sets kubectl to the environment\'s namespace.')
         # Logs
         parser = subparsers.add_parser('logs', help='Show logs of container in deployment.')
         if type == 'docker':
