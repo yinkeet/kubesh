@@ -16,9 +16,9 @@ class AKS(Kubernetes):
     @property
     def short_image_name_template(self) -> str:
         if self.templates is None:
-            return '$APP/__CONTAINER__'
+            return '$NAMESPACE/$APP/__CONTAINER__'
         else:
-            return self.templates.get('aks_short_image_name', '$APP/__CONTAINER__')
+            return self.templates.get('aks_short_image_name', '$NAMESPACE/$APP/__CONTAINER__')
 
     def get_build_image_name(self, container: str) -> str:
         image_name = generate_image_name(container, self.image_name_template)
