@@ -8,6 +8,23 @@ from environment import Environment
 
 
 class Docker(Environment):
+    def _build_command(self, command) -> List[str]:
+        if isinstance(self.deployment_filename, str):
+            base = ['docker-compose', '-f', self.deployment_filename]
+        elif isinstance(self.deployment_filename, list) and list:
+            base = ['docker-compose']
+            for deployment_filename in self.deployment_filename:
+                base.extend(['-f', deployment_filename])
+        else:
+            raise ValueError('deployment_filename should be str or list')
+        if isinstance(command, str):
+            base.append(command)
+        elif isinstance(command, list) and list:
+            base.extend(command)
+        else:
+            raise ValueError('command should be str or list')
+        return base
+
     @property
     def image_name_template(self):
         if self.templates is None:
@@ -16,18 +33,17 @@ class Docker(Environment):
             return self.templates.get('docker_image_name', '__DIRECTORY_NAME_____CONTAINER__')
 
     def build(self, containers: List[str]=[]):
-        command = ['docker-compose', '-f', self.deployment_filename, 'build']
+        command = self._build_command('build')
         if containers:
             command.extend(containers)
         call(command)
     
     def config(self):
         print('')
-        command = ['docker-compose', '-f', self.deployment_filename, 'config']
-        call(command)
+        call(self._build_command('config'))
 
     def run(self, containers: List[str]=[]):
-        command = ['docker-compose', '-f', self.deployment_filename, 'up', '-d']
+        command = self._build_command(['up', '-d'])
         if containers:
             command.extend(containers)
         call(command)
@@ -51,13 +67,13 @@ class Docker(Environment):
             print('Nothing to clean')
 
     def stop(self, containers: List[str]=[]):
-        command = ['docker-compose', '-f', self.deployment_filename, 'stop']
+        command = self._build_command('stop')
         if containers:
             command.extend(containers)
         call(command)
 
     def logs(self, containers: List[str]=[], pod: str=None, container: str=None, follow: bool=False):
-        command = ['docker-compose', '-f', self.deployment_filename, 'logs']
+        command = self._build_command('logs')
         if follow:
             command.append('-f')
         if containers:
@@ -68,7 +84,7 @@ class Docker(Environment):
             sys.exit(0)
 
     def ssh(self, pod: str=None, container: str=None, command: str=None, args: List[str]=[]):
-        command = ['docker-compose', '-f', self.deployment_filename, 'exec', container, command]
+        command = self._build_command(['exec', container, command])
         if args:
             command.extend(args)
         call(command)
