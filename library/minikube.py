@@ -4,21 +4,18 @@ from subprocess import PIPE, CalledProcessError, call, check_output, run
 from time import sleep
 from typing import List
 
-from common import (Condition, WrapPrint, generate_image_name, get_containers,
-                    load_deployment_file, minikube_health_checker)
-from environment import Environment
+from library.common import WrapPrint, load_deployment_file, minikube_health_checker
+from library.environment import Environment, NameFactory
 
 
 class Minikube(Environment):
-    @property
-    def image_name_template(self) -> str:
-        if self.templates is None:
-            return 'localhost:5000/$NAMESPACE/$APP/__CONTAINER__'
-        else:
-            return self.templates.get('minikube_image_name', 'localhost:5000/$NAMESPACE/$APP/__CONTAINER__')
+    def __init__(self, info: dict, templates: dict):
+        super().__init__(info, templates)
+        self.image_name_factory = NameFactory(
+            self.templates.get('minikube_image_name', 'localhost:5000/$NAMESPACE/$APP/__CONTAINER__') + ':latest'
+        )
 
     @minikube_health_checker
-    @Condition('containers', get_containers, 'dockerfile_filename')
     def build(self, containers=[]):
 
         @WrapPrint('Starting local registry... ', 'done')
@@ -36,7 +33,7 @@ class Minikube(Environment):
         start_local_registry()
         # Build and push images to local registry
         for container in containers:
-            image_name = generate_image_name(container, self.image_name_template)
+            image_name = self.image_name_factory.make({'__CONTAINER__': container})
             call(['docker', 'build', '--force-rm', '--rm', '--file', container + '/' + self.dockerfile_filename, '-t', image_name, os.getcwd() + '/' + container])
             call(['docker', 'push', image_name])
         stop_local_registry()
@@ -44,27 +41,25 @@ class Minikube(Environment):
     @WrapPrint('Loading image names... ', 'done')
     def _load_image_names(self, containers):
         for container in containers:
-            image_name = generate_image_name(container, self.image_name_template) + ':latest'
+            image_name = self.image_name_factory.make({'__CONTAINER__': container})
             os.environ[container.upper() + '_IMAGE_NAME'] = check_output(['docker', 'image', 'inspect', image_name, '-f', '{{index .RepoDigests 0}}']).decode('UTF-8').replace('\n', '')
 
     @minikube_health_checker
-    def config(self):
-        self._load_image_names(get_containers(self.dockerfile_filename))
+    def config(self, containers):
+        self._load_image_names(containers)
         print('\n' + load_deployment_file(self.deployment_filename) + '\n')
         
     @minikube_health_checker
-    @Condition('containers', get_containers, 'dockerfile_filename')
-    def run(self, containers=[]):
+    def run(self, containers):
         self._load_image_names(containers)
         run(['kubectl', 'apply', '-f', '-'], input=load_deployment_file(self.deployment_filename), encoding='UTF-8')
 
     @minikube_health_checker
     @WrapPrint('Cleaning up... ', 'done')
-    @Condition('containers', get_containers, 'dockerfile_filename')
-    def clean_up(self, containers: List[str]=[]):
+    def clean_up(self, containers: List[str]):
         untagged_images = []
         for container in containers:
-            image_name = generate_image_name(container, self.image_name_template)
+            image_name = self.image_name_factory.make({'__CONTAINER__': container})
             untagged_images.extend (
                 check_output(
                     ['docker', 'images', image_name, '-f', 'dangling=true', '-q']
@@ -77,8 +72,7 @@ class Minikube(Environment):
             call(command, stdout=PIPE)
 
     @minikube_health_checker
-    @Condition('containers', get_containers, 'dockerfile_filename')
-    def stop(self, containers=[]):
+    def stop(self, containers):
         self._load_image_names(containers)
         run(['kubectl', 'delete', '-f', '-'], input=load_deployment_file(self.deployment_filename), encoding='UTF-8')
 

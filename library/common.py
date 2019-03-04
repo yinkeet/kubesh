@@ -7,20 +7,6 @@ import yaml
 from dotenv import load_dotenv
 
 
-class Condition(object):
-    def __init__(self, kwarg_name, func, *args):
-        self.kwarg_name = kwarg_name
-        self.func = func
-        self.args = args
-
-    def __call__(self, func):
-        def wrapper(*args, **kwargs):
-            if not kwargs[self.kwarg_name]:
-                func_args = [getattr(args[0], arg) for arg in self.args]
-                kwargs[self.kwarg_name] = self.func(*func_args)
-            return func(*args,**kwargs)
-        return wrapper
-
 class WrapPrint(object):
     def __init__(self, prefix, suffix):
         self.prefix = prefix
@@ -59,10 +45,6 @@ def load_environment_variables(variables=[]):
     
     return results
 
-def generate_image_name(container: str, image_name_template: str) -> str:
-    template = os.path.expandvars(image_name_template)
-    return template.replace('__CONTAINER__', container)
-
 @WrapPrint('Loading deployment file... ', 'done')
 def load_deployment_file(deployment_filename: str):
     with open(deployment_filename, 'r') as deployment_file:
@@ -72,7 +54,7 @@ def load_deployment_file(deployment_filename: str):
 def minikube_health_checker(func):
     def wrapper(*args, **kwargs):
         try:
-            status = check_output(['minikube', 'status', '--format', '{{.MinikubeStatus}}']).decode('UTF-8')
+            status = check_output(['minikube', 'status', '--format', '{{.Host}}']).decode('UTF-8')
         except CalledProcessError as error:
             status = error.output.decode('UTF-8')
         if status != 'Running':
@@ -92,5 +74,24 @@ def get_services(deployment_filename: str):
 
 def get_containers(dockerfile_filename):
     return check_output(
-        ['find', '.', '-type', 'f', '-name', dockerfile_filename]
+        ['find', '.', '-type', 'f', '-maxdepth', '2', '-mindepth' ,'2', '-name', dockerfile_filename]
     ).decode('UTF-8').replace('./', '').replace('/' + dockerfile_filename, '').splitlines()
+
+def get_containers_from_yaml(deployment_filename):
+    containers = []
+    with open(deployment_filename, 'r') as stream:
+        for data in yaml.safe_load_all(stream):
+            if 'kind' in data and data['kind'] == 'Deployment':
+                try:
+                    spec = data['spec']['template']['spec']
+                    if 'initContainers' in spec:
+                        for container in spec['initContainers']:
+                            containers.append(os.path.expandvars(container['name']))
+                    
+                    for container in spec['containers']:
+                        containers.append(os.path.expandvars(container['name']))
+
+                except KeyError as error:
+                    print(error)
+                    exit(1)
+    return containers

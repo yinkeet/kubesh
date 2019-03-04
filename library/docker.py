@@ -3,11 +3,16 @@ import sys
 from subprocess import PIPE, call, check_output
 from typing import List
 
-from common import Condition, WrapPrint, generate_image_name, get_services
-from environment import Environment
+from library.environment import Environment, NameFactory
 
 
 class Docker(Environment):
+    def __init__(self, info: dict, templates: dict):
+        super().__init__(info, templates)
+        self.image_name_factory = NameFactory(
+            self.templates.get('docker_image_name', '__DIRECTORY_NAME_____CONTAINER__')
+        )
+
     def _build_command(self, command) -> List[str]:
         if isinstance(self.deployment_filename, str):
             base = ['docker-compose', '-f', self.deployment_filename]
@@ -25,13 +30,6 @@ class Docker(Environment):
             raise ValueError('command should be str or list')
         return base
 
-    @property
-    def image_name_template(self):
-        if self.templates is None:
-            return '__DIRECTORY_NAME_____CONTAINER__'
-        else:
-            return self.templates.get('docker_image_name', '__DIRECTORY_NAME_____CONTAINER__')
-
     def build(self, containers: List[str]=[]):
         command = self._build_command('build')
         if containers:
@@ -48,11 +46,10 @@ class Docker(Environment):
             command.extend(containers)
         call(command)
 
-    @Condition('containers', get_services, 'deployment_filename')
     def clean_up(self, containers: List[str]=[]):
         untagged_images = []
         for container in containers:
-            image_name = self.image_name_template.replace('__DIRECTORY_NAME__', os.getcwd().split(os.sep)[-1]).replace('__CONTAINER__', container)
+            image_name = self.image_name_factory.make({'__DIRECTORY_NAME__': os.getcwd().split(os.sep)[-1], '__CONTAINER__': container})
             untagged_images.extend (
                 check_output(
                     ['docker', 'images', image_name, '-f', 'dangling=true', '-q']

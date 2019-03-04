@@ -4,21 +4,20 @@ from subprocess import PIPE, CalledProcessError, call, check_output, run
 from time import sleep
 from typing import List
 
-from common import (Condition, WrapPrint, generate_image_name, get_containers,
-                    load_environment_variables)
-from kubernetes import Kubernetes
+from library.common import WrapPrint, load_environment_variables
+from library.environment import NameFactory
+from library.kubernetes import Kubernetes
 
 
 class GKE(Kubernetes):
-    @property
-    def image_name_template(self) -> str:
-        if self.templates is None:
-            return '$CONTAINER_REGISTRY/$PROJECT/$NAMESPACE/$APP/__CONTAINER__'
-        else:
-            return self.templates.get('gcr_image_name', '$CONTAINER_REGISTRY/$PROJECT/$NAMESPACE/$APP/__CONTAINER__')
+    def __init__(self, info: dict, templates: dict):
+        super().__init__(info, templates)
+        self.image_name_factory = NameFactory(
+            self.templates.get('gcr_image_name', '$CONTAINER_REGISTRY/$PROJECT/$NAMESPACE/$APP/__CONTAINER__')
+        )
 
     def get_build_image_name(self, container: str) -> str:
-        image_name = generate_image_name(container, self.image_name_template)
+        image_name = self.image_name_factory.make({'__CONTAINER__': container})
         if not self.production:
             image_name += ':latest'
         else:
@@ -27,16 +26,11 @@ class GKE(Kubernetes):
         return image_name
 
     def get_deployment_image_name(self, container: str) -> str:
-        image_name = generate_image_name(container, self.image_name_template)
-        if not self.production:
-            image_name += ':latest'
-        else:
-            with open(container + '/tag') as tag:
-                image_name += ':' + tag.read()
-        return check_output(['gcloud', 'container', 'images', 'describe', image_name, '--format="value(image_summary.fully_qualified_digest)"']).decode('UTF-8').replace('\n', '')
+        image_name = self.get_build_image_name(container)
+        return check_output(['gcloud', 'container', 'images', 'describe', image_name, '--format', 'value(image_summary.fully_qualified_digest)']).decode('UTF-8').replace('\n', '')
 
     def container_built_and_pushed(self, container: str) -> bool:
-        image_name = generate_image_name(container, self.image_name_template)
+        image_name = self.image_name_factory.make({'__CONTAINER__': container})
         with open(container + '/tag') as tag:
             image_name += ':' + tag.read()
         return call(['gcloud', 'container', 'images', 'describe', image_name], stdout=PIPE, stderr=PIPE) == 0
@@ -56,11 +50,10 @@ class GKE(Kubernetes):
         run(['kubectl', 'apply', '-f', '-'], input=data, encoding='UTF-8', stdout=PIPE)
 
     @WrapPrint('Cleaning up... ', 'done')
-    @Condition('containers', get_containers, 'dockerfile_filename')
-    def clean_up(self, containers: List[str]=[]):
+    def clean_up(self, containers: List[str]):
         untagged_images = []
         for container in containers:
-            image_name = generate_image_name(container, self.image_name_template)
+            image_name = self.image_name_factory.make({'__CONTAINER__': container})
             digests = check_output(
                 ['gcloud', 'container', 'images', 'list-tags', image_name, '--filter=-tags:*', '--limit=unlimited', '--format=get(digest)']
             ).decode('UTF-8').splitlines()
@@ -80,4 +73,6 @@ class GKE(Kubernetes):
 
     def cluster(self):
         variables = load_environment_variables(['CLUSTER', 'ZONE', 'PROJECT'])
+        print('Pointing to google \'' + variables['CLUSTER'] + '\' cluster... ', end='', flush=True)
         call(['gcloud', 'container', 'clusters', 'get-credentials', variables['CLUSTER'], '--zone', variables['ZONE'], '--project', variables['PROJECT']])
+        print('done')

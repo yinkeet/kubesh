@@ -3,9 +3,8 @@ import sys
 from abc import abstractmethod
 from subprocess import PIPE, call, check_output, run
 
-from common import (Condition, WrapPrint, generate_image_name, get_containers,
-                    load_deployment_file, load_environment_variables)
-from environment import Environment
+from library.common import WrapPrint, load_deployment_file, load_environment_variables
+from library.environment import Environment
 
 
 class Kubernetes(Environment):
@@ -21,8 +20,7 @@ class Kubernetes(Environment):
     def container_built_and_pushed(self, container: str) -> bool:
         pass
 
-    @Condition('containers', get_containers, 'dockerfile_filename')
-    def build(self, containers=[]):
+    def build(self, containers):
         for container in containers:
             image_name = self.get_build_image_name(container)
             if not (self.production and self.container_built_and_pushed(container)):
@@ -32,12 +30,12 @@ class Kubernetes(Environment):
                 print('Image ' + image_name + ' has already been built and pushed to the cloud.')
 
     @WrapPrint('Loading image names... ', 'done')
-    def _load_image_name(self, containers):
+    def _load_image_names(self, containers):
         for container in containers:
             os.environ[container.upper() + '_IMAGE_NAME'] = self.get_deployment_image_name(container)
     
-    def config(self):
-        self._load_image_name(get_containers(self.dockerfile_filename))
+    def config(self, containers):
+        self._load_image_names(containers)
         print('\n' + load_deployment_file(self.deployment_filename) + '\n')
 
     @WrapPrint('Creating image pull secret... ', 'done')
@@ -53,14 +51,12 @@ class Kubernetes(Environment):
         data = check_output(['kubectl', 'create', 'secret', 'docker-registry', name, '--docker-server', server, '--docker-username', username, '--docker-password', password, '--docker-email', email, '--dry-run', '-o', 'yaml']).decode('UTF-8')
         run(['kubectl', 'apply', '-f', '-'], input=data, encoding='UTF-8', stdout=PIPE)
 
-    @Condition('containers', get_containers, 'dockerfile_filename')
-    def run(self, containers=[]):
-        self._load_image_name(containers)
+    def run(self, containers):
+        self._load_image_names(containers)
         run(['kubectl', 'apply', '-f', '-'], input=load_deployment_file(self.deployment_filename), encoding='UTF-8')
 
-    @Condition('containers', get_containers, 'dockerfile_filename')
-    def stop(self, containers=[]):
-        self._load_image_name(containers)
+    def stop(self, containers):
+        self._load_image_names(containers)
         run(['kubectl', 'delete', '-f', '-'], input=load_deployment_file(self.deployment_filename), encoding='UTF-8')
 
     def namespace(self):
