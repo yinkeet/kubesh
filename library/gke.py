@@ -49,7 +49,6 @@ class GKE(Kubernetes):
         data = check_output(['kubectl', 'create', 'secret', 'docker-registry', name, '--docker-server', server, '--docker-username', username, '--docker-password', password, '--docker-email', email, '--dry-run', '-o', 'yaml']).decode('UTF-8')
         run(['kubectl', 'apply', '-f', '-'], input=data, encoding='UTF-8', stdout=PIPE)
 
-    @WrapPrint('Cleaning up... ', 'done')
     def clean_up(self, containers: List[str]):
         untagged_images = []
         for container in containers:
@@ -65,6 +64,8 @@ class GKE(Kubernetes):
             for untagged_image in untagged_images:
                 command = ['gcloud', 'container', 'images', 'delete', '--quiet', untagged_image]
                 call(command, stdout=PIPE)
+        else:
+            print('Nothing to clean')
 
     def auth(self):
         variables = load_environment_variables(['GOOGLE_AUTH_KEY_FILE'])
