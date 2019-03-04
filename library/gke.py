@@ -73,6 +73,4 @@ class GKE(Kubernetes):
 
     def cluster(self):
         variables = load_environment_variables(['CLUSTER', 'ZONE', 'PROJECT'])
-        print('Pointing to google \'' + variables['CLUSTER'] + '\' cluster... ', end='', flush=True)
         call(['gcloud', 'container', 'clusters', 'get-credentials', variables['CLUSTER'], '--zone', variables['ZONE'], '--project', variables['PROJECT']])
-        print('done')
