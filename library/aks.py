@@ -1,8 +1,8 @@
 from subprocess import PIPE, call, check_output
 from typing import List
 
-from common import WrapPrint, generate_image_name, load_environment_variables
-from kubernetes import Kubernetes
+from library.common import WrapPrint, generate_image_name, load_environment_variables
+from library.kubernetes import Kubernetes
 
 
 class AKS(Kubernetes):
