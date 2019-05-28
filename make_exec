@@ -13,7 +13,7 @@ cd $root_directory
 # Build MacOS executable
 virtualenv kubesh
 source kubesh/bin/activate
-pip install -r requirements.txt
+pip3 install -r requirements.txt
 
 pyinstaller --clean kubesh.spec
 cp helper/install_mac dist/install
