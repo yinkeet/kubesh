@@ -70,7 +70,7 @@ class GKE(Kubernetes):
     def auth(self):
         variables = load_environment_variables(['GOOGLE_AUTH_KEY_FILE'])
         call(['gcloud', 'auth', 'activate-service-account', '--key-file', variables['GOOGLE_AUTH_KEY_FILE']])
-        call(['docker-credential-gcr', 'configure-docker'])
+        call(['docker-credential-gcloud', 'configure-docker'])
 
     def cluster(self):
         variables = load_environment_variables(['CLUSTER', 'ZONE', 'PROJECT'])
