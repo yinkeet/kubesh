@@ -68,9 +68,12 @@ class GKE(Kubernetes):
             print('Nothing to clean')
 
     def auth(self):
-        variables = load_environment_variables(['GOOGLE_AUTH_KEY_FILE'])
+        variables = load_environment_variables(['GOOGLE_AUTH_KEY_FILE', 'CONTAINER_REGISTRY'])
         call(['gcloud', 'auth', 'activate-service-account', '--key-file', variables['GOOGLE_AUTH_KEY_FILE']])
-        call(['docker-credential-gcloud', 'configure-docker'])
+        with open(variables['GOOGLE_AUTH_KEY_FILE']) as text_file:
+            keyfile = text_file.read()
+        run(['docker', 'login', '-u', '_json_key', '--password-stdin',
+             'https://' + variables['CONTAINER_REGISTRY']], input=keyfile, encoding='UTF-8', stdout=PIPE)
 
     def cluster(self):
         variables = load_environment_variables(['CLUSTER', 'ZONE', 'PROJECT'])
