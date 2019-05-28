@@ -3,7 +3,7 @@ root_directory=$PWD
 
 # Build Linux executable
 docker build -t kubesh_builder_image .
-docker run -it --rm --name kubesh_builder -v "$PWD/dist":/usr/src/app/dist kubesh_builder_image
+docker run -it --rm --name kubesh_builder -v "$PWD/dist":/usr/src/app/dist -v "$PWD/build":/usr/src/app/build kubesh_builder_image
 cp helper/install_linux dist/install
 cp kubesh.json dist/kubesh.json
 cd $PWD/dist
