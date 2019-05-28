@@ -42,7 +42,10 @@ class Minikube(Environment):
     def _load_image_names(self, containers):
         for container in containers:
             image_name = self.image_name_factory.make({'__CONTAINER__': container})
-            os.environ[container.upper() + '_IMAGE_NAME'] = check_output(['docker', 'image', 'inspect', image_name, '-f', '{{index .RepoDigests 0}}']).decode('UTF-8').replace('\n', '')
+            try:
+                os.environ[container.upper() + '_IMAGE_NAME'] = check_output(['docker', 'image', 'inspect', image_name, '-f', '{{index .RepoDigests 0}}']).decode('UTF-8').replace('\n', '')
+            except CalledProcessError as e:
+                pass
 
     @minikube_health_checker
     def config(self, containers):

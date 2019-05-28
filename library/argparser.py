@@ -36,15 +36,21 @@ Clipboard:
         
         # Config
         parser = subparsers.add_parser('config', help='Show deployment config yaml.')
-        parser.add_argument('--containers', action='store_const', const=False, default=buildable_containers)
+        if type != 'docker':
+            parser.add_argument('--containers', action='store_const', const=False, default=buildable_containers)
         
         # Image pull secret
         if type == 'kubernetes':
             parser = subparsers.add_parser('image_pull_secret', help='Creates an image pull secret.')
         
+        if type == 'docker':
+            containers = all_containers
+        else:
+            containers = buildable_containers
+            
         # Run
         parser = subparsers.add_parser('run', help='Run deployment.')
-        parser.add_argument('-c', '--containers', nargs='+', choices=all_containers, default=all_containers, help='Containers to run')
+        parser.add_argument('-c', '--containers', nargs='+', choices=containers, default=containers, help='Containers to run')
         
         # Remove untagged images
         parser = subparsers.add_parser('clean_up', help='Remove untagged images.')
@@ -52,7 +58,7 @@ Clipboard:
         
         # Stop
         parser = subparsers.add_parser('stop', help='Stop deployment.')
-        parser.add_argument('-c', '--containers', nargs='+', choices=all_containers, default=all_containers, help='Containers to stop')
+        parser.add_argument('-c', '--containers', nargs='+', choices=containers, default=containers, help='Containers to stop')
         
         # Namespace
         if type != 'docker':
