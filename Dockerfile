@@ -9,6 +9,6 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY kubesh.py .
 COPY kubesh.linux.spec .
-COPY library .
+COPY library library
 
 ENTRYPOINT [ "pyinstaller", "--clean", "kubesh.linux.spec" ]
