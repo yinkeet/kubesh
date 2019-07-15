@@ -101,6 +101,8 @@ ENV/
 env.bak/
 venv.bak/
 
+kubesh/
+
 # Spyder project settings
 .spyderproject
 .spyproject
