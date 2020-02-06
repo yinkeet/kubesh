@@ -42,18 +42,21 @@ class Config(object):
                 self.settings = json.load(data)
 
     def __load_containers(self):
-        self.containers = {}
-        for id, setting in self.settings['environments'].items():
-            load_environment_file(setting['environment_filename'])
-            if setting['type'] == 'docker':
-                all_containers = self.__get_docker_compose_containers(setting['deployment_filename'])
+        for id, setting in dict(self.settings['environments']).items():
+            if os.path.isfile(os.getcwd() + '/' + setting['environment_filename']):    
+                load_environment_file(setting['environment_filename'])
+                if setting['type'] == 'docker':
+                    all_containers = self.__get_docker_compose_containers(setting['deployment_filename'])
+                else:
+                    all_containers = self.__get_deployment_containers(setting['deployment_filename'])
+                buildable_containers = self.__filter_buildable_containers(all_containers, setting['dockerfile_filename'])
+                self.settings['environments'][id]['containers'] = {
+                    'all': all_containers,
+                    'buildable': buildable_containers
+                }
             else:
-                all_containers = self.__get_deployment_containers(setting['deployment_filename'])
-            buildable_containers = self.__filter_buildable_containers(all_containers, setting['dockerfile_filename'])
-            self.settings['environments'][id]['containers'] = {
-                'all': all_containers,
-                'buildable': buildable_containers
-            }
+                print('Error \'{}\' not found!'.format(setting['environment_filename']))
+                del self.settings['environments'][id]
 
     def __get_docker_compose_containers(self, filenames: str):
         def get_services(filename: str):

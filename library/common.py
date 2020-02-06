@@ -23,15 +23,9 @@ class WrapPrint(object):
 def load_environment_file(filename: str):
     # Load general .env file
     env_path = os.getcwd() + '/.env'
-    if not os.path.isfile(env_path):
-        print (env_path + ' does not exist')
-        exit(1)
     load_dotenv(dotenv_path=env_path, override=True)
     # Load specific .env file
     env_path = os.getcwd() + '/' + filename
-    if not os.path.isfile(env_path):
-        print (env_path + ' does not exist')
-        exit(1)
     load_dotenv(dotenv_path=env_path, override=True)
 
 def load_environment_variables(variables=[]):
