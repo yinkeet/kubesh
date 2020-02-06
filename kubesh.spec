@@ -4,7 +4,7 @@ block_cipher = None
 
 
 a = Analysis(['kubesh.py'],
-             pathex=['library', '/Users/keet/Projects/yinkeet/kubesh'],
+             pathex=['library', '/Users/yinkeet/Projects/yinkeet/kubesh'],
              binaries=[],
              datas=[],
              hiddenimports=[],
