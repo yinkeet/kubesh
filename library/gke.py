@@ -1,6 +1,6 @@
 import os
 import sys
-from subprocess import PIPE, CalledProcessError, call, check_output, run
+from subprocess import PIPE, CalledProcessError, call, check_output, run, DEVNULL
 from time import sleep
 from typing import List
 
@@ -27,7 +27,11 @@ class GKE(Kubernetes):
 
     def get_deployment_image_name(self, container: str) -> str:
         image_name = self.get_build_image_name(container)
-        return check_output(['gcloud', 'container', 'images', 'describe', image_name, '--format', 'value(image_summary.fully_qualified_digest)']).decode('UTF-8').replace('\n', '')
+        try:
+            return check_output(['gcloud', 'container', 'images', 'describe', image_name, '--format', 'value(image_summary.fully_qualified_digest)'], stderr=DEVNULL).decode('UTF-8').replace('\n', '')
+        except CalledProcessError as _error:
+            return None
+        # return check_output(['gcloud', 'container', 'images', 'describe', image_name, '--format', 'value(image_summary.fully_qualified_digest)']).decode('UTF-8').replace('\n', '')
 
     def container_built_and_pushed(self, container: str) -> bool:
         image_name = self.image_name_factory.make({'__CONTAINER__': container})
