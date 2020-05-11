@@ -89,18 +89,27 @@ class Config(object):
             string = os.path.expandvars(string)
             yaml.add_multi_constructor('', default_ctor)
             for data in yaml.load_all(string):
-                if 'kind' in data and data['kind'] == 'Deployment':
-                    try:
-                        spec = data['spec']['template']['spec']
-                        if 'initContainers' in spec:
-                            for container in spec['initContainers']:
+                if 'kind' in data:
+                    if data['kind'] == 'Deployment':
+                        try:
+                            spec = data['spec']['template']['spec']
+                            if 'initContainers' in spec:
+                                for container in spec['initContainers']:
+                                    containers.append(container['name'])
+                            
+                            for container in spec['containers']:
                                 containers.append(container['name'])
-                        
-                        for container in spec['containers']:
-                            containers.append(container['name'])
-                    except KeyError as error:
-                        print(error)
-                        exit(1)
+                        except KeyError as error:
+                            print(error)
+                            exit(1)
+                    elif data['kind'] == 'CronJob':
+                        try:
+                            spec = data['spec']['jobTemplate']['spec']['template']['spec']
+                            for container in spec['containers']:
+                                containers.append(container['name'])
+                        except KeyError as error:
+                            print(error)
+                            exit(1)
         return containers
         
     def __filter_buildable_containers(self, all_containers: list, dockerfile_filename: str):
