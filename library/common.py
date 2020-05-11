@@ -67,7 +67,7 @@ def minikube_health_checker(func):
 def get_services(deployment_filename: str):
     with open(deployment_filename, 'r') as stream:
         try:
-            return [service for service, details in yaml.load(stream)['services'].items()]
+            return [service for service, details in yaml.load(stream, Loader=yaml.Loader)['services'].items()]
         except yaml.YAMLError as error:
             print(error)
             exit(1)

@@ -62,7 +62,7 @@ class Config(object):
         def get_services(filename: str):
             with open(filename, 'r') as stream:
                 try:
-                    return [service for service, _ in yaml.load(stream)['services'].items()]
+                    return [service for service, _ in yaml.load(stream, Loader=yaml.Loader)['services'].items()]
                 except yaml.YAMLError as error:
                     print(error)
                     exit(1)
