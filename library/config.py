@@ -88,7 +88,7 @@ class Config(object):
             string = stream.read()
             string = os.path.expandvars(string)
             yaml.add_multi_constructor('', default_ctor)
-            for data in yaml.load_all(string):
+            for data in yaml.load_all(string, Loader=yaml.Loader):
                 if 'kind' in data:
                     if data['kind'] == 'Deployment':
                         try:
