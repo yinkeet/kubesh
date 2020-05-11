@@ -1,4 +1,4 @@
-FROM python:3
+FROM python:3.7
 
 # RUN apk update && apk upgrade && apk add --no-cache zlib-dev musl-dev libc-dev gcc
 
