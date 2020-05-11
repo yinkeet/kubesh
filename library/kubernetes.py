@@ -32,7 +32,9 @@ class Kubernetes(Environment):
     @WrapPrint('Loading image names... ', 'done')
     def _load_image_names(self, containers):
         for container in containers:
-            os.environ[container.upper() + '_IMAGE_NAME'] = self.get_deployment_image_name(container)
+            container_image_name = self.get_deployment_image_name(container)
+            if container_image_name:
+                os.environ[container.upper() + '_IMAGE_NAME'] = container_image_name
     
     def config(self, containers):
         self._load_image_names(containers)
